@@ -10,6 +10,7 @@ import { useEditor } from "../editor/context";
 import type { DialogState } from "./dialogState";
 import { handleDeleteSelection } from "./deleteActions";
 import { isCompactWidth } from "./layout";
+import { fileShortcut } from "./shortcuts";
 
 type UiContextValue = {
   explorerOpen: boolean;
@@ -75,19 +76,36 @@ export function useKeyboardShortcuts() {
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
+      if (dialog.kind !== "none") return;
+
+      const file = fileShortcut(e);
+      if (file) {
+        e.preventDefault();
+        switch (file) {
+          case "new":
+            window.dispatchEvent(new CustomEvent("rectra:new"));
+            break;
+          case "open":
+            window.dispatchEvent(new CustomEvent("rectra:open"));
+            break;
+          case "save":
+            window.dispatchEvent(new CustomEvent("rectra:save"));
+            break;
+          case "export":
+            window.dispatchEvent(new CustomEvent("rectra:export"));
+            break;
+        }
+        return;
+      }
+
       const t = e.target as HTMLElement;
       if (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT") return;
-      if (dialog.kind !== "none") return;
 
       if (e.key === "Delete" || e.key === "Backspace") {
         if (state.selection.kind === "none") return;
         e.preventDefault();
         handleDeleteSelection(state, dispatch, setDialog);
         return;
-      }
-      if ((e.metaKey || e.ctrlKey) && e.key === "s") {
-        e.preventDefault();
-        window.dispatchEvent(new CustomEvent("rectra:save"));
       }
       if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === "z") {
         e.preventDefault();

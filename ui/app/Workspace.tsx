@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { EditorCanvas } from "../editor/canvas/EditorCanvas";
 import { useEditor } from "../editor/context";
+import { projectHasAnchor } from "../model";
 import { DialogLayer } from "./Dialogs";
 import { Explorer } from "./Explorer";
 import { FooterBar, Toolbar } from "./Toolbar";
@@ -103,6 +104,12 @@ export function Workspace() {
   }, [guardUnsaved]);
 
   useEffect(() => {
+    const onNew = () => {
+      guardUnsaved(() => {
+        dispatch({ type: "NEW_PROJECT" });
+      });
+    };
+
     const onOpen = () => {
       guardUnsaved(async () => {
         const dir = await pickOpenProjectDir();
@@ -151,12 +158,22 @@ export function Workspace() {
       void triggerSave();
     };
 
+    const onExport = () => {
+      if (projectHasAnchor(stateRef.current.project)) {
+        setDialog({ kind: "export" });
+      }
+    };
+
+    window.addEventListener("rectra:new", onNew);
     window.addEventListener("rectra:save", onSaveEvent);
     window.addEventListener("rectra:open", onOpen);
+    window.addEventListener("rectra:export", onExport);
     window.addEventListener("rectra:replace-image", onReplace);
     return () => {
+      window.removeEventListener("rectra:new", onNew);
       window.removeEventListener("rectra:save", onSaveEvent);
       window.removeEventListener("rectra:open", onOpen);
+      window.removeEventListener("rectra:export", onExport);
       window.removeEventListener("rectra:replace-image", onReplace);
     };
   }, [dispatch, guardUnsaved, screen, setDialog]);

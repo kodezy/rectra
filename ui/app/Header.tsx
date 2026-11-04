@@ -5,13 +5,10 @@ import { normalizeName } from "../model/names";
 import { Button } from "./components/Button";
 import { HEADER_HEIGHT } from "./layout";
 import { Logo } from "./Logo";
-import { useUnsavedGuard } from "./useUnsavedGuard";
-import { useUi } from "./ui-context";
+import { fileActionTitle } from "./shortcuts";
 
 export function Header() {
   const { state, dispatch } = useEditor();
-  const { setDialog } = useUi();
-  const guardUnsaved = useUnsavedGuard();
   const screen = state.project.screens.find((s) => s.id === state.activeScreenId);
   const canExport = projectHasAnchor(state.project);
   const [projectName, setProjectName] = useState(state.project.name);
@@ -63,22 +60,21 @@ export function Header() {
       <div className="flex shrink-0 items-center gap-2">
         <Button
           className="min-w-[76px]"
-          onClick={() =>
-            guardUnsaved(() => {
-              dispatch({ type: "NEW_PROJECT" });
-            })
-          }
+          title={fileActionTitle("New", "N")}
+          onClick={() => window.dispatchEvent(new CustomEvent("rectra:new"))}
         >
           New
         </Button>
         <Button
           className="min-w-[76px]"
+          title={fileActionTitle("Open", "O")}
           onClick={() => window.dispatchEvent(new CustomEvent("rectra:open"))}
         >
           Open
         </Button>
         <Button
           className="min-w-[76px]"
+          title={fileActionTitle("Save", "S")}
           onClick={() => window.dispatchEvent(new CustomEvent("rectra:save"))}
         >
           Save
@@ -87,7 +83,8 @@ export function Header() {
           variant="primary"
           className="min-w-[102px]"
           disabled={!canExport}
-          onClick={() => setDialog({ kind: "export" })}
+          title={fileActionTitle("Export", "E")}
+          onClick={() => window.dispatchEvent(new CustomEvent("rectra:export"))}
         >
           Export
         </Button>

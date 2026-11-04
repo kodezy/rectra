@@ -50,12 +50,12 @@ npm run tauri build
 | Select / Anchor / Component | `V` / `A` / `C` |
 | Pan | Space (hold) or Pan tool |
 | Fit | `F` |
-| Save | `Ctrl/Cmd+S` |
+| New / Open / Save / Export | `Ctrl/Cmd+N` / `O` / `S` / `E` |
 | Undo / Redo | `Ctrl/Cmd+Z` / `Ctrl/Cmd+Shift+Z` |
 | Delete selection | `Delete` / `Backspace` |
 | Cancel drawing or dialog | `Esc` |
 
-Shortcuts do not fire while an input, textarea, select, or dialog is focused. Component is disabled until an anchor is selected.
+Canvas shortcuts do not fire while an input, textarea, select, or dialog is focused. File chords work with a focused field. Component is disabled until an anchor is selected.
 
 ## Development
 
