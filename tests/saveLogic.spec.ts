@@ -63,5 +63,12 @@ describe("saveLogic", () => {
         screens: [{ image: { path: "a" } }],
       }),
     ).toBe(false);
+    expect(
+      isExportMappingsDocument({
+        formatVersion: 1,
+        projectId: "x",
+        screens: [{ name: "Overview" }],
+      }),
+    ).toBe(false);
   });
 });

@@ -1,5 +1,4 @@
 import type { Project } from "./types";
-import { newId } from "./types";
 
 /** Spec example 1280×720 with anchors A/B and search_field + submit_button */
 export function specExampleProject(): Project {
@@ -42,15 +41,5 @@ export function specExampleProject(): Project {
         ],
       },
     ],
-  };
-}
-
-export function minimalScreenWithImage(width: number, height: number) {
-  return {
-    id: newId(),
-    name: "Overview",
-    image: { path: "", width, height },
-    anchors: [] as Project["screens"][0]["anchors"],
-    components: [] as Project["screens"][0]["components"],
   };
 }

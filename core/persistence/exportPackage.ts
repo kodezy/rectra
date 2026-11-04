@@ -2,6 +2,7 @@ import { exists, mkdir, readDir, readFile, remove, rename, writeFile } from "@ta
 import { buildExportMappings, projectHasAnchor } from "../model";
 import type { EditorState } from "../editor/reducer";
 import { joinPath } from "./paths";
+import { isExportMappingsDocument } from "./saveLogic";
 
 function parentDir(path: string): string {
   const idx = Math.max(path.lastIndexOf("/"), path.lastIndexOf("\\"));
@@ -13,11 +14,8 @@ export async function isRecognizedExportDir(dir: string): Promise<boolean> {
   if (!(await exists(mapPath))) return false;
   try {
     const bytes = await readFile(mapPath);
-    const o = JSON.parse(new TextDecoder().decode(bytes)) as Record<string, unknown>;
-    if (o.formatVersion !== 1 || typeof o.projectId !== "string") return false;
-    if (!Array.isArray(o.screens)) return false;
-    const first = o.screens[0] as Record<string, unknown> | undefined;
-    if (first && "image" in first) return false;
+    const parsed: unknown = JSON.parse(new TextDecoder().decode(bytes));
+    if (!isExportMappingsDocument(parsed)) return false;
     const templates = joinPath(dir, "templates");
     if (!(await exists(templates))) return false;
     const rootEntries = await readDir(dir);

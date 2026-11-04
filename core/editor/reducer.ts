@@ -1,17 +1,18 @@
-import type {
-  Anchor,
-  Component,
-  ComponentType,
-  Placement,
-  Project,
-  Rect,
-  Screen,
-  Selection,
-  ScreenImageMem,
+import {
+  emptyProject,
+  newId,
+  type Anchor,
+  type Component,
+  type ComponentType,
+  type Placement,
+  type Project,
+  type Rect,
+  type Screen,
+  type ScreenImageMem,
+  type Selection,
 } from "../model/types";
-import { clampRect, moveRect, resizeRect, translateRectByAnchor } from "../model/geometry";
+import { clampRect, translateRectByAnchor } from "../model/geometry";
 import { nextSequentialName, normalizeName } from "../model/names";
-import { newId } from "../model/types";
 
 export type Tool = "select" | "anchor" | "component" | "pan";
 
@@ -77,12 +78,7 @@ const MAX_UNDO = 50;
 
 export function initialEditorState(): EditorState {
   return {
-    project: {
-      formatVersion: 1,
-      id: newId(),
-      name: "Untitled project",
-      screens: [],
-    },
+    project: emptyProject(),
     selection: { kind: "none" },
     activeAnchorId: null,
     activeScreenId: null,
@@ -134,7 +130,7 @@ function getScreen(project: Project, screenId: string): Screen | undefined {
 export function editorReducer(state: EditorState, action: EditorAction): EditorState {
   switch (action.type) {
     case "NEW_PROJECT":
-      return { ...initialEditorState(), project: { ...initialEditorState().project, name: action.name ?? "Untitled project" } };
+      return { ...initialEditorState(), project: emptyProject(action.name ?? "Untitled project") };
 
     case "SET_PROJECT": {
       const activeScreenId = action.project.screens[0]?.id ?? null;
@@ -518,31 +514,6 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
     default:
       return state;
   }
-}
-
-export function movePlacementRect(
-  screen: Screen,
-  componentId: string,
-  anchorId: string,
-  dx: number,
-  dy: number,
-): Rect | null {
-  const component = screen.components.find((c) => c.id === componentId);
-  const placement = component?.placements.find((p) => p.anchorId === anchorId);
-  if (!placement) return null;
-  return moveRect(placement.rect, dx, dy, screen.image);
-}
-
-export function resizePlacementRect(
-  screen: Screen,
-  componentId: string,
-  anchorId: string,
-  next: Partial<Rect>,
-): Rect | null {
-  const component = screen.components.find((c) => c.id === componentId);
-  const placement = component?.placements.find((p) => p.anchorId === anchorId);
-  if (!placement) return null;
-  return resizeRect(placement.rect, next, screen.image);
 }
 
 export function unmappedComponentsForAnchor(screen: Screen, anchorId: string): Component[] {
