@@ -165,10 +165,3 @@ function validateComponent(
     placements,
   };
 }
-
-export function isExportMappingsJson(raw: unknown): boolean {
-  if (!raw || typeof raw !== "object") return false;
-  const o = raw as Record<string, unknown>;
-  if (o.formatVersion !== 1) return false;
-  return typeof o.projectId === "string" && Array.isArray(o.screens);
-}

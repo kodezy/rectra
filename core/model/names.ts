@@ -38,12 +38,6 @@ export function nextSequentialName(prefix: string, existing: string[]): string {
   return `${prefix}_${max + 1}`;
 }
 
-export function validateProjectName(_project: Project, name: string): string | null {
-  const n = normalizeName(name);
-  if (isNameEmpty(n)) return "Name is required";
-  return null;
-}
-
 export function validateScreenName(
   project: Project,
   screenId: string,
