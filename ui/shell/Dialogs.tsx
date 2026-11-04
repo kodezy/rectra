@@ -24,7 +24,12 @@ export function DialogLayer() {
   }
   if (dialog.kind === "unsaved") {
     return (
-      <Modal title="Unsaved changes" width={440} onClose={() => dialog.onResolve("cancel")}>
+      <Modal
+        title="Unsaved changes"
+        width={440}
+        onClose={() => dialog.onResolve("cancel")}
+        onEnter={() => dialog.onResolve("save")}
+      >
         <p className="text-[13px] text-muted">Save changes before closing?</p>
         <div className="mt-8 flex justify-end gap-2 border-t border-border pt-5">
           <Button onClick={() => dialog.onResolve("cancel")}>Cancel</Button>
@@ -39,18 +44,16 @@ export function DialogLayer() {
   if (dialog.kind === "confirmDelete" || dialog.kind === "confirmReplace") {
     const confirmLabel = dialog.kind === "confirmReplace" ? "Replace" : "Delete";
     const variant = dialog.kind === "confirmReplace" ? "primary" : "destructive";
+    const confirm = () => {
+      dialog.onConfirm();
+      setDialog({ kind: "none" });
+    };
     return (
-      <Modal title={dialog.title} width={440} onClose={() => setDialog({ kind: "none" })}>
+      <Modal title={dialog.title} width={440} onClose={() => setDialog({ kind: "none" })} onEnter={confirm}>
         <p className="whitespace-pre-line text-[13px] text-muted">{dialog.message}</p>
         <div className="mt-8 flex justify-end gap-2 border-t border-border pt-5">
           <Button onClick={() => setDialog({ kind: "none" })}>Cancel</Button>
-          <Button
-            variant={variant}
-            onClick={() => {
-              dialog.onConfirm();
-              setDialog({ kind: "none" });
-            }}
-          >
+          <Button variant={variant} onClick={confirm}>
             {confirmLabel}
           </Button>
         </div>
@@ -85,12 +88,18 @@ function ExportDialog({ onClose }: { onClose: () => void }) {
   };
 
   if (replaceAsk) {
+    const confirmReplace = () => void runExport(true);
     return (
-      <Modal title="Replace export" width={440} onClose={() => setReplaceAsk(false)}>
+      <Modal
+        title="Replace export"
+        width={440}
+        onClose={() => setReplaceAsk(false)}
+        onEnter={confirmReplace}
+      >
         <p className="text-[13px] text-muted">Replace the existing export package in this folder?</p>
         <div className="mt-8 flex justify-end gap-2 border-t border-border pt-5">
           <Button onClick={() => setReplaceAsk(false)}>Cancel</Button>
-          <Button variant="primary" onClick={() => void runExport(true)}>
+          <Button variant="primary" onClick={confirmReplace}>
             Replace
           </Button>
         </div>
@@ -98,8 +107,10 @@ function ExportDialog({ onClose }: { onClose: () => void }) {
     );
   }
 
+  const exportNow = () => void runExport(false);
+
   return (
-    <Modal title="Export" width={532} onClose={onClose}>
+    <Modal title="Export" width={532} onClose={onClose} onEnter={exportNow}>
       <p className="text-[11px] font-semibold tracking-[0.06em] text-subtle">DESTINATION</p>
       <div className="mt-2 flex gap-2">
         <input
@@ -138,7 +149,7 @@ function ExportDialog({ onClose }: { onClose: () => void }) {
         <Button className="min-w-[105px]" onClick={onClose}>
           Cancel
         </Button>
-        <Button variant="primary" className="min-w-[105px]" onClick={() => void runExport(false)}>
+        <Button variant="primary" className="min-w-[105px]" onClick={exportNow}>
           Export
         </Button>
       </div>
@@ -167,8 +178,19 @@ function MapComponentDialog({
     );
   };
 
+  const mapSelected = () => {
+    if (selectedIds.length === 0) return;
+    dispatch({
+      type: "MAP_COMPONENTS_TO_ANCHOR",
+      screenId,
+      anchorId,
+      componentIds: selectedIds,
+    });
+    onClose();
+  };
+
   return (
-    <Modal title="Map component" width={505} onClose={onClose}>
+    <Modal title="Map component" width={505} onClose={onClose} onEnter={mapSelected}>
       <p className="text-[13px] text-muted">
         Choose components for {anchor?.name ?? "this anchor"}. Offsets follow each
         component's existing mapping.
@@ -212,15 +234,7 @@ function MapComponentDialog({
           variant="primary"
           className="min-w-[105px]"
           disabled={selectedIds.length === 0}
-          onClick={() => {
-            dispatch({
-              type: "MAP_COMPONENTS_TO_ANCHOR",
-              screenId,
-              anchorId,
-              componentIds: selectedIds,
-            });
-            onClose();
-          }}
+          onClick={mapSelected}
         >
           Map
         </Button>
@@ -233,11 +247,13 @@ function Modal({
   title,
   children,
   onClose,
+  onEnter,
   width = 448,
 }: {
   title: string;
   children: React.ReactNode;
   onClose: () => void;
+  onEnter?: () => void;
   width?: number;
 }) {
   useEffect(() => {
@@ -245,11 +261,18 @@ function Modal({
       if (e.key === "Escape") {
         e.preventDefault();
         onClose();
+        return;
+      }
+      if (e.key === "Enter" && onEnter) {
+        const t = e.target as HTMLElement;
+        if (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT") return;
+        e.preventDefault();
+        onEnter();
       }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [onClose]);
+  }, [onClose, onEnter]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0a0b0d]/75 p-4">
