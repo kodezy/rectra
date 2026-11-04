@@ -59,7 +59,6 @@ Dependency direction: `core/model` imports nothing from `ui`, `core/editor`, or 
 
 - No product plugins, telemetry, multi-screenshot-per-screen, snap/grid, or Save As.
 - `native/src/lib.rs` registers dialog, fs, and opener; no domain commands. Opener is unused from the UI.
-- No CI workflow in this repo.
 
 ## Commands
 
@@ -74,5 +73,7 @@ npm run dev           # Vite only
 npm run tauri dev     # desktop app
 npm run tauri build
 ```
+
+CI: [`.github/workflows/ci.yml`](.github/workflows/ci.yml) — `npm test`, `npm run build` on push to `main` and on pull requests.
 
 Icon set: `npx tauri icon native/app-icon.svg` writes `native/icons/`. Dock on macOS follows a rebuilt `native/target/debug/rectra`, not the Vite HMR session.
