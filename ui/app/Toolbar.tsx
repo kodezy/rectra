@@ -1,6 +1,6 @@
 import { useEditor } from "../editor/context";
 import { totalMappingsOnScreen } from "../editor/reducer";
-import { fitImageInHost, stepUserScale, zoomToward } from "../editor/viewport";
+import { clampViewportPan, fitImageInHost, stepUserScale, zoomToward } from "../editor/viewport";
 import { ToolButton } from "./components/Button";
 import { CANVAS_TOOLBAR_HEIGHT, FOOTER_HEIGHT } from "./layout";
 import { useActiveScreen } from "./ui-context";
@@ -22,14 +22,24 @@ export function Toolbar({ canvasSize }: ToolbarProps) {
       screen.image.height,
     );
     const pivot = { x: canvasSize.width / 2, y: canvasSize.height / 2 };
-    const next = zoomToward(
+    const zoomed = zoomToward(
       state.viewport,
       fit,
       pivot,
       stepUserScale(state.viewport.scale, direction),
     );
-    if (next === state.viewport) return;
-    dispatch({ type: "SET_VIEWPORT", viewport: next });
+    if (zoomed === state.viewport) return;
+    dispatch({
+      type: "SET_VIEWPORT",
+      viewport: clampViewportPan(
+        zoomed,
+        fit,
+        canvasSize.width,
+        canvasSize.height,
+        screen.image.width,
+        screen.image.height,
+      ),
+    });
   };
 
   return (

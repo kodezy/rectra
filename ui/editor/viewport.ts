@@ -46,3 +46,35 @@ export function zoomToward(
 export function stepUserScale(scale: number, direction: -1 | 1): number {
   return clampUserScale(scale + direction * 0.1);
 }
+
+export function clampViewportPan(
+  viewport: Viewport,
+  fit: Fit,
+  hostW: number,
+  hostH: number,
+  imageW: number,
+  imageH: number,
+): Viewport {
+  if (hostW <= 0 || hostH <= 0 || imageW <= 0 || imageH <= 0) {
+    return viewport;
+  }
+  const displayScale = viewport.scale * fit.scale;
+  const displayedW = imageW * displayScale;
+  const displayedH = imageH * displayScale;
+  const keepX = Math.min(displayedW, hostW / 2);
+  const keepY = Math.min(displayedH, hostH / 2);
+  const minImageX = keepX - displayedW;
+  const maxImageX = hostW - keepX;
+  const minImageY = keepY - displayedH;
+  const maxImageY = hostH - keepY;
+  const imageX = fit.x + viewport.offsetX;
+  const imageY = fit.y + viewport.offsetY;
+  const clampedX = Math.min(maxImageX, Math.max(minImageX, imageX));
+  const clampedY = Math.min(maxImageY, Math.max(minImageY, imageY));
+  const offsetX = clampedX - fit.x;
+  const offsetY = clampedY - fit.y;
+  if (offsetX === viewport.offsetX && offsetY === viewport.offsetY) {
+    return viewport;
+  }
+  return { ...viewport, offsetX, offsetY };
+}

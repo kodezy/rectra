@@ -11,6 +11,7 @@ import type { Screen } from "../../model/types";
 import { useEditor } from "../context";
 import type { Viewport } from "../reducer";
 import {
+  clampViewportPan,
   fitImageInHost,
   stepUserScale,
   zoomToward,
@@ -55,10 +56,22 @@ export function EditorCanvas({
     [width, height, imageW, imageH],
   );
 
-  const applyViewport = useCallback((next: Viewport) => {
-    viewportRef.current = next;
-    dispatch({ type: "SET_VIEWPORT", viewport: next });
-  }, [dispatch]);
+  const applyViewport = useCallback(
+    (next: Viewport) => {
+      const clamped = clampViewportPan(next, fit, width, height, imageW, imageH);
+      const current = viewportRef.current;
+      if (
+        clamped.scale === current.scale &&
+        clamped.offsetX === current.offsetX &&
+        clamped.offsetY === current.offsetY
+      ) {
+        return;
+      }
+      viewportRef.current = clamped;
+      dispatch({ type: "SET_VIEWPORT", viewport: clamped });
+    },
+    [dispatch, fit, width, height, imageW, imageH],
+  );
 
   const displayScale = scale * fit.scale;
   const imageX = fit.x + offsetX;
@@ -105,6 +118,10 @@ export function EditorCanvas({
     };
     window.addEventListener("rectra:fit", onFit);
     return () => window.removeEventListener("rectra:fit", onFit);
+  }, [applyViewport]);
+
+  useEffect(() => {
+    applyViewport(viewportRef.current);
   }, [applyViewport]);
 
   useEffect(() => {

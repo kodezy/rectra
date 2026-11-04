@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { imagePointFromStage } from "../ui/model/geometry";
 import {
   clampUserScale,
+  clampViewportPan,
   fitImageInHost,
   stepUserScale,
   zoomToward,
@@ -77,5 +78,80 @@ describe("zoomToward", () => {
     const corner = zoomToward(base, fit, { x: 100, y: 50 }, 1.3);
     expect(center.offsetX).not.toBe(corner.offsetX);
     expect(center.offsetY).not.toBe(corner.offsetY);
+  });
+});
+
+describe("clampViewportPan", () => {
+  const hostW = 800;
+  const hostH = 600;
+  const imageW = 400;
+  const imageH = 300;
+  const fit = fitImageInHost(hostW, hostH, imageW, imageH);
+
+  function imageX(viewport: { offsetX: number; scale: number }) {
+    return fit.x + viewport.offsetX;
+  }
+
+  it("pulls huge offsets back into range", () => {
+    const viewport = { scale: 1, offsetX: 10_000, offsetY: -10_000 };
+    const next = clampViewportPan(viewport, fit, hostW, hostH, imageW, imageH);
+    expect(next.offsetX).not.toBe(10_000);
+    expect(next.offsetY).not.toBe(-10_000);
+    const x = imageX(next);
+    const displayScale = next.scale * fit.scale;
+    const displayedW = imageW * displayScale;
+    const keepX = Math.min(displayedW, hostW / 2);
+    expect(x).toBeGreaterThanOrEqual(keepX - displayedW);
+    expect(x).toBeLessThanOrEqual(hostW - keepX);
+  });
+
+  it("allows image edges at host bounds when zoomed larger than host", () => {
+    const viewport = { scale: 2, offsetX: 0, offsetY: 0 };
+    const displayScale = viewport.scale * fit.scale;
+    const displayedW = imageW * displayScale;
+    const atLeft = clampViewportPan(
+      { scale: 2, offsetX: -fit.x, offsetY: 0 },
+      fit,
+      hostW,
+      hostH,
+      imageW,
+      imageH,
+    );
+    expect(imageX(atLeft)).toBeCloseTo(0, 5);
+    const atRight = clampViewportPan(
+      { scale: 2, offsetX: hostW - displayedW - fit.x, offsetY: 0 },
+      fit,
+      hostW,
+      hostH,
+      imageW,
+      imageH,
+    );
+    expect(imageX(atRight)).toBeCloseTo(hostW - displayedW, 5);
+  });
+
+  it("keeps small image fully inside host", () => {
+    const smallFit = fitImageInHost(1000, 800, 200, 150);
+    const viewport = { scale: 1, offsetX: 500, offsetY: 500 };
+    const next = clampViewportPan(viewport, smallFit, 1000, 800, 200, 150);
+    const displayScale = next.scale * smallFit.scale;
+    const x = smallFit.x + next.offsetX;
+    const y = smallFit.y + next.offsetY;
+    const w = 200 * displayScale;
+    const h = 150 * displayScale;
+    expect(x).toBeGreaterThanOrEqual(0);
+    expect(y).toBeGreaterThanOrEqual(0);
+    expect(x + w).toBeLessThanOrEqual(1000);
+    expect(y + h).toBeLessThanOrEqual(800);
+  });
+
+  it("no-ops when host or image size is zero", () => {
+    const viewport = { scale: 1, offsetX: 99, offsetY: 88 };
+    expect(clampViewportPan(viewport, fit, 0, hostH, imageW, imageH)).toBe(viewport);
+    expect(clampViewportPan(viewport, fit, hostW, hostH, 0, imageH)).toBe(viewport);
+  });
+
+  it("returns same viewport when already in range", () => {
+    const viewport = { scale: 1, offsetX: 0, offsetY: 0 };
+    expect(clampViewportPan(viewport, fit, hostW, hostH, imageW, imageH)).toBe(viewport);
   });
 });
