@@ -33,6 +33,7 @@ function extFromPath(path: string): string {
 export async function pickOpenProjectDir(): Promise<string | null> {
   const selected = await open({
     directory: true,
+    recursive: true,
     multiple: false,
     title: "Open project",
   });
@@ -73,6 +74,7 @@ export async function loadProjectFromDir(projectDir: string): Promise<LoadedProj
 export async function pickSaveParentDir(): Promise<string | null> {
   const selected = await open({
     directory: true,
+    recursive: true,
     multiple: false,
     title: "Choose folder for project",
   });
@@ -183,6 +185,7 @@ export function decodeImageDimensions(bytes: Uint8Array): Promise<{ width: numbe
 export async function pickExportDir(): Promise<string | null> {
   const selected = await open({
     directory: true,
+    recursive: true,
     multiple: false,
     title: "Export mappings",
   });
