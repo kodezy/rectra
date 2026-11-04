@@ -2,7 +2,7 @@ import { useEditor } from "../editor/context";
 import { totalMappingsOnScreen } from "../editor/reducer";
 import { fitImageInHost, stepUserScale, zoomToward } from "../editor/viewport";
 import { ToolButton } from "./components/Button";
-import { FOOTER_HEIGHT } from "./layout";
+import { CANVAS_TOOLBAR_HEIGHT, FOOTER_HEIGHT } from "./layout";
 import { useActiveScreen } from "./ui-context";
 
 type ToolbarProps = {
@@ -12,8 +12,6 @@ type ToolbarProps = {
 export function Toolbar({ canvasSize }: ToolbarProps) {
   const { state, dispatch } = useEditor();
   const screen = useActiveScreen();
-  const componentDisabled = !state.activeAnchorId;
-  const componentActive = state.tool === "component" || state.tool === "mapPlacement";
 
   const zoomStep = (direction: -1 | 1) => {
     if (!screen) return;
@@ -35,64 +33,37 @@ export function Toolbar({ canvasSize }: ToolbarProps) {
   };
 
   return (
-    <div className="flex h-[50px] shrink-0 items-center border-b border-border bg-canvas px-4">
+    <div
+      className="flex shrink-0 items-center justify-end border-b border-border bg-surface px-4"
+      style={{ height: CANVAS_TOOLBAR_HEIGHT }}
+    >
       <ToolButton
-        active={state.tool === "select"}
-        title="Select (V)"
-        onClick={() => dispatch({ type: "SET_TOOL", tool: "select" })}
+        active={state.showOverlays}
+        className={state.showOverlays ? "border border-border" : ""}
+        onClick={() => dispatch({ type: "TOGGLE_OVERLAYS" })}
       >
-        Select
+        Overlays
       </ToolButton>
-      <ToolButton
-        active={state.tool === "anchor"}
-        title="Anchor (A)"
-        onClick={() => dispatch({ type: "SET_TOOL", tool: "anchor" })}
+      <ToolButton title="Fit (F)" onClick={() => window.dispatchEvent(new CustomEvent("rectra:fit"))}>
+        Fit
+      </ToolButton>
+      <button
+        type="button"
+        className="px-2 text-[12px] text-muted hover:text-text"
+        onClick={() => zoomStep(-1)}
       >
-        Anchor
-      </ToolButton>
-      <ToolButton
-        active={componentActive}
-        disabled={componentDisabled}
-        title={componentDisabled ? "Select an anchor first" : "Component (C)"}
-        onClick={() => dispatch({ type: "SET_TOOL", tool: "component" })}
+        −
+      </button>
+      <span className="min-w-[36px] text-center text-[12px] text-muted">
+        {Math.round(state.viewport.scale * 100)}%
+      </span>
+      <button
+        type="button"
+        className="px-2 text-[12px] text-muted hover:text-text"
+        onClick={() => zoomStep(1)}
       >
-        Component
-      </ToolButton>
-      <ToolButton
-        active={state.tool === "pan"}
-        title="Pan (Space)"
-        onClick={() => dispatch({ type: "SET_TOOL", tool: "pan" })}
-      >
-        Pan
-      </ToolButton>
-      <div className="ml-auto flex items-center">
-        <ToolButton
-          active={state.showOverlays}
-          onClick={() => dispatch({ type: "TOGGLE_OVERLAYS" })}
-        >
-          Overlays
-        </ToolButton>
-        <ToolButton title="Fit (F)" onClick={() => window.dispatchEvent(new CustomEvent("rectra:fit"))}>
-          Fit
-        </ToolButton>
-        <button
-          type="button"
-          className="px-2 text-[12px] text-muted hover:text-text"
-          onClick={() => zoomStep(-1)}
-        >
-          −
-        </button>
-        <span className="min-w-[36px] text-center text-[12px] text-muted">
-          {Math.round(state.viewport.scale * 100)}%
-        </span>
-        <button
-          type="button"
-          className="px-2 text-[12px] text-muted hover:text-text"
-          onClick={() => zoomStep(1)}
-        >
-          +
-        </button>
-      </div>
+        +
+      </button>
     </div>
   );
 }

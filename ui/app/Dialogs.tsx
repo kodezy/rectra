@@ -103,7 +103,7 @@ function ExportDialog({ onClose }: { onClose: () => void }) {
       <p className="text-[11px] font-semibold tracking-[0.06em] text-subtle">DESTINATION</p>
       <div className="mt-2 flex gap-2">
         <input
-          className="h-[39px] min-w-0 flex-1 rounded-[4px] bg-input px-3 text-[12px]"
+          className="h-[39px] min-w-0 flex-1 rounded-[5px] bg-input px-3 text-[12px] focus-visible:ring-1 focus-visible:ring-text"
           placeholder="Folder path"
           value={dest}
           onChange={(e) => {

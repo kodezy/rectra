@@ -18,7 +18,7 @@ import { handleDeleteSelection } from "./deleteActions";
 import { useActiveScreen, useUi } from "./ui-context";
 
 const fieldClass =
-  "mt-1 h-[35px] w-full rounded-[4px] border-0 bg-input px-2.5 text-[12px] text-text";
+  "mt-1 h-[35px] w-full rounded-[5px] border-0 bg-input px-2.5 text-[12px] text-text focus-visible:ring-1 focus-visible:ring-text";
 
 export function Inspector() {
   const { state } = useEditor();
@@ -215,7 +215,7 @@ function InspectorPlacement({
     <InspectorShell>
       <p className="mt-4 text-[18px] font-semibold">{component.name}</p>
       <p className="mt-1 text-[11px] text-muted">
-        {anchorCount} anchor{anchorCount === 1 ? "" : "s"}
+        Shared component  •  {anchorCount} anchor{anchorCount === 1 ? "" : "s"}
       </p>
       <div className="mt-4 h-px bg-border" />
       <label className="mt-5 text-[12px] text-muted">Name</label>
@@ -248,7 +248,7 @@ function InspectorPlacement({
           <button
             key={t}
             type="button"
-            className={`h-[34px] rounded-[4px] text-[12px] ${
+            className={`h-[34px] rounded-[5px] text-[12px] focus-visible:ring-1 focus-visible:ring-text ${
               component.type === t
                 ? "bg-selected font-semibold text-text"
                 : "bg-input font-normal text-muted"
@@ -269,13 +269,13 @@ function InspectorPlacement({
       <p className="mt-6 text-[11px] font-semibold tracking-[0.06em] text-subtle">MAPPING</p>
       <p className="mt-3 text-[12px] text-muted">Anchor</p>
       <div className="relative mt-1">
-        <div className="flex h-[33px] items-center justify-between rounded-[4px] bg-input px-2.5 text-[12px]">
+        <div className="flex h-[33px] items-center justify-between rounded-[5px] bg-input px-2.5 text-[12px]">
           <span>{anchor.name}</span>
           <span className="text-muted">⌄</span>
         </div>
       </div>
       <p className="mt-5 text-[11px] font-semibold tracking-[0.06em] text-subtle">
-        POSITION  ·  PX
+        ABSOLUTE  ·  PX
       </p>
       <RectFields
         rect={placement.rect}
@@ -291,7 +291,9 @@ function InspectorPlacement({
         }
       />
       <div className="mt-5 h-px bg-border" />
-      <p className="mt-5 text-[11px] font-semibold tracking-[0.06em] text-subtle">OFFSET  ·  PX</p>
+      <p className="mt-5 text-[11px] font-semibold tracking-[0.06em] text-subtle">
+        OFFSET  ·  RELATIVE
+      </p>
       <p className="mt-3 text-[13px] font-medium text-text">
         {formatOffset(component.type, placement.rect, anchor.rect)}
       </p>
@@ -303,7 +305,7 @@ function InspectorPlacement({
           )
         }
       >
-        Copy
+        Copy offset
       </Button>
     </InspectorShell>
   );
@@ -368,7 +370,7 @@ function RectFields({
         <div key={key}>
           <label className="text-[11px] text-muted">{label}</label>
           <input
-            className={`mt-1 h-[34px] w-full rounded-[4px] bg-input px-2.5 text-[12px] ${
+            className={`mt-1 h-[34px] w-full rounded-[5px] bg-input px-2.5 text-[12px] focus-visible:ring-1 focus-visible:ring-text ${
               error ? "ring-1 ring-destructive" : ""
             }`}
             value={draft[key]}

@@ -18,7 +18,7 @@ export function Header() {
   }, [state.project.name]);
 
   const crumb = screen
-    ? `${state.project.name}  /  ${screen.name}`
+    ? `${state.project.name} / ${screen.name}`
     : state.project.name;
 
   return (
@@ -51,7 +51,7 @@ export function Header() {
           />
           {screen && (
             <span className="truncate">
-              {"  /  "}
+              {" / "}
               {screen.name}
             </span>
           )}

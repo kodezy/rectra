@@ -9,7 +9,7 @@ const styles: Record<Variant, string> = {
     "bg-input text-text font-medium hover:bg-selected disabled:text-subtle",
   ghost: "text-text hover:bg-selected disabled:opacity-40",
   destructive:
-    "bg-input text-destructive font-medium hover:bg-selected disabled:opacity-40",
+    "bg-destructive text-primary font-semibold hover:opacity-90 disabled:opacity-40",
 };
 
 export function Button({
@@ -24,7 +24,7 @@ export function Button({
   return (
     <button
       type="button"
-      className={`inline-flex h-8 items-center justify-center rounded-[5px] px-4 text-[12px] ${styles[variant]} ${className}`}
+      className={`inline-flex h-8 items-center justify-center rounded-[5px] px-4 text-[12px] focus-visible:ring-1 focus-visible:ring-text ${styles[variant]} ${className}`}
       {...props}
     >
       {children}
@@ -41,7 +41,7 @@ export function ToolButton({
   return (
     <button
       type="button"
-      className={`inline-flex h-8 items-center justify-center rounded-[5px] px-3 text-[12px] font-medium ${
+      className={`inline-flex h-8 items-center justify-center rounded-[5px] px-3 text-[12px] font-medium focus-visible:ring-1 focus-visible:ring-text ${
         active ? "bg-selected text-text" : "text-muted hover:text-text"
       } ${className}`}
       {...props}

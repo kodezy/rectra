@@ -5,6 +5,7 @@ import { projectHasAnchor } from "../model";
 import { DialogLayer } from "./Dialogs";
 import { Explorer } from "./Explorer";
 import { FooterBar, Toolbar } from "./Toolbar";
+import { Toolrail } from "./Toolrail";
 import { Header } from "./Header";
 import { Inspector } from "./Inspector";
 import { Button } from "./components/Button";
@@ -201,12 +202,15 @@ export function Workspace() {
             {!screen ? (
               <EmptyWorkspace onImport={() => void importFirstScreen(dispatch)} />
             ) : (
-              <EditorCanvas
-                screen={screen}
-                imageUrl={imageUrl}
-                width={canvasSize.width}
-                height={canvasSize.height}
-              />
+              <>
+                <EditorCanvas
+                  screen={screen}
+                  imageUrl={imageUrl}
+                  width={canvasSize.width}
+                  height={canvasSize.height}
+                />
+                <Toolrail />
+              </>
             )}
           </div>
         </main>
