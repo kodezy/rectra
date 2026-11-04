@@ -30,7 +30,6 @@ ui/shell/              workspace (Explorer, Inspector, toolbar, dialogs)
 ui/editor/             React context + Konva canvas
 native/                Tauri 2 window + dialog/fs/opener plugins
 tests/                 Vitest: model, reducer, saveLogic, layout
-docs/product/          product spec (behavior)
 ```
 
 Import aliases (tsconfig + Vite): `@core/*`, `@ui/*`.
@@ -43,7 +42,7 @@ Dependency direction: `core/model` imports nothing from `ui`, `core/editor`, or 
 - Session state: `{ project, screenImages, selection, tool, view }` plus undo/redo of `{ project, screenImages }`.
 - Screenshots stay in memory (`Uint8Array` + `pendingWrite`) until Save writes assets.
 - Persistence uses `@tauri-apps/plugin-fs` and `@tauri-apps/plugin-dialog`. Save is transactional (temp dir then replace).
-- Appearance: Tailwind tokens `rectra.dark`; visual source is Penpot file `Rectra · UI`. Behavior source is `docs/product/rectra_product_spec_v0_4.md`.
+- Appearance: Tailwind tokens `rectra.dark`. Penpot file `Rectra · UI` is the source for layout, copy, and product behavior.
 - Compact layout when window width `< 1280` (explorer 208, inspector 256 vs 240/296).
 
 ## Invariants

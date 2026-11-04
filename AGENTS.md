@@ -1,6 +1,6 @@
 # Rectra
 
-Desktop screenshot-to-component mapper. Stack: Tauri 2, React 19, TypeScript, Vite, Tailwind 4, Konva. Spec: `docs/product/rectra_product_spec_v0_4.md`. Appearance: Penpot `Rectra · UI`. Map: [ARCHITECTURE.md](ARCHITECTURE.md).
+Desktop screenshot-to-component mapper. Stack: Tauri 2, React 19, TypeScript, Vite, Tailwind 4, Konva. Appearance and product behavior: Penpot `Rectra · UI`. Map: [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Commands
 
@@ -18,13 +18,13 @@ npm run tauri dev
 - **Model B:** logical components; one placement per `(componentId, anchorId)`; offsets derived from rects, not stored.
 - Domain stays in `core/model`. Do not add HTTP, Python, OpenCV, a database, Zustand, Zod, custom Rust commands, plugins, or telemetry.
 - One screenshot per screen (PNG/JPEG). No snap, grid, or Save As.
-- UI copy English. Product spec is behavior; Penpot is pixels/layout.
+- UI copy English. Penpot `Rectra · UI` is behavior and layout.
 - `core/model` must not import `ui`, `core/editor`, or `core/persistence`.
 
 ## Context routing
 
 - Architecture and module boundaries → [ARCHITECTURE.md](ARCHITECTURE.md)
-- Product behavior, file format, shortcuts → `docs/product/rectra_product_spec_v0_4.md`
+- Product behavior, file format, shortcuts → [ARCHITECTURE.md](ARCHITECTURE.md), Penpot `Rectra · UI`, `ui/shell/shortcuts.ts`, `core/persistence/`
 - Types and geometry → `core/model/`
 - Session edits / undo → `core/editor/reducer.ts`
 - Canvas → `ui/editor/canvas/EditorCanvas.tsx`
