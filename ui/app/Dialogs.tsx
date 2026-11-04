@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useEditor } from "../editor/context";
 import { unmappedComponentsForAnchor } from "../editor/reducer";
 import { exportMappingsPackage } from "../persistence/exportPackage";
@@ -86,7 +86,7 @@ function ExportDialog({ onClose }: { onClose: () => void }) {
 
   if (replaceAsk) {
     return (
-      <Modal title="Replace export" width={440} onClose={onClose}>
+      <Modal title="Replace export" width={440} onClose={() => setReplaceAsk(false)}>
         <p className="text-[13px] text-muted">Replace the existing export package in this folder?</p>
         <div className="mt-8 flex justify-end gap-2 border-t border-border pt-5">
           <Button onClick={() => setReplaceAsk(false)}>Cancel</Button>
@@ -229,6 +229,17 @@ function Modal({
   onClose: () => void;
   width?: number;
 }) {
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [onClose]);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0a0b0d]/75 p-4">
       <div

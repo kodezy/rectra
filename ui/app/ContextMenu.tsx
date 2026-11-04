@@ -16,11 +16,19 @@ type Props = {
 export function ContextMenu({ x, y, items, onClose }: Props) {
   useEffect(() => {
     const close = () => onClose();
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onClose();
+      }
+    };
     window.addEventListener("click", close);
     window.addEventListener("contextmenu", close);
+    window.addEventListener("keydown", onKeyDown);
     return () => {
       window.removeEventListener("click", close);
       window.removeEventListener("contextmenu", close);
+      window.removeEventListener("keydown", onKeyDown);
     };
   }, [onClose]);
 

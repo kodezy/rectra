@@ -21,10 +21,18 @@ type Props = {
   imageUrl: string | null;
   width: number;
   height: number;
+  canvasLocked?: boolean;
   onCursor?: (point: { x: number; y: number } | null) => void;
 };
 
-export function EditorCanvas({ screen, imageUrl, width, height, onCursor }: Props) {
+export function EditorCanvas({
+  screen,
+  imageUrl,
+  width,
+  height,
+  canvasLocked = false,
+  onCursor,
+}: Props) {
   const { state, dispatch } = useEditor();
   const [image] = useHtmlImage(imageUrl);
   const stageRef = useRef<Konva.Stage>(null);
@@ -61,7 +69,9 @@ export function EditorCanvas({ screen, imageUrl, width, height, onCursor }: Prop
   const activeAnchorId = state.activeAnchorId;
 
   useEffect(() => {
+    if (canvasLocked) setSpacePan(false);
     const onKeyDown = (e: KeyboardEvent) => {
+      if (canvasLocked) return;
       const t = e.target as HTMLElement;
       if (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT") return;
       if (e.code === "Space") {
@@ -78,7 +88,13 @@ export function EditorCanvas({ screen, imageUrl, width, height, onCursor }: Prop
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keyup", onKeyUp);
     };
-  }, []);
+  }, [canvasLocked]);
+
+  useEffect(() => {
+    if (drawing) return;
+    setDrawStart(null);
+    setDraftRect(null);
+  }, [drawing]);
 
   const toImagePoint = (stageX: number, stageY: number) =>
     imagePointFromStage(stageX, stageY, imageX, imageY, displayScale);

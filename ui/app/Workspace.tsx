@@ -40,6 +40,7 @@ export function Workspace() {
     setExplorerWidth,
     setInspectorWidth,
     setDialog,
+    dialog,
   } = useUi();
   const guardUnsaved = useUnsavedGuard();
   const screen = useActiveScreen();
@@ -208,6 +209,7 @@ export function Workspace() {
                   imageUrl={imageUrl}
                   width={canvasSize.width}
                   height={canvasSize.height}
+                  canvasLocked={dialog.kind !== "none"}
                 />
                 <Toolrail />
               </>
