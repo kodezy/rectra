@@ -9,16 +9,11 @@ import type {
   Selection,
   ScreenImageMem,
 } from "../model/types";
-import { clampRect, moveRect, resizeRect } from "../model/geometry";
+import { clampRect, moveRect, resizeRect, translateRectByAnchor } from "../model/geometry";
 import { nextSequentialName, normalizeName } from "../model/names";
 import { newId } from "../model/types";
 
-export type Tool =
-  | "select"
-  | "anchor"
-  | "component"
-  | "pan"
-  | "mapPlacement";
+export type Tool = "select" | "anchor" | "component" | "pan";
 
 export type Viewport = {
   scale: number;
@@ -27,12 +22,6 @@ export type Viewport = {
 };
 
 export type SaveStatus = "saved" | "unsaved";
-
-export type PendingMap = {
-  screenId: string;
-  anchorId: string;
-  componentId: string;
-};
 
 type UndoSnapshot = {
   project: Project;
@@ -50,7 +39,6 @@ export type EditorState = {
   saveStatus: SaveStatus;
   projectDir: string | null;
   showOverlays: boolean;
-  pendingMap: PendingMap | null;
   undoStack: UndoSnapshot[];
   redoStack: UndoSnapshot[];
   screenImages: Record<string, ScreenImageMem>;
@@ -75,8 +63,7 @@ export type EditorAction =
   | { type: "RENAME_ANCHOR"; screenId: string; anchorId: string; name: string }
   | { type: "DELETE_ANCHOR"; screenId: string; anchorId: string }
   | { type: "CREATE_COMPONENT"; screenId: string; anchorId: string; rect: Rect; componentType?: ComponentType }
-  | { type: "START_MAP_PLACEMENT"; pending: PendingMap }
-  | { type: "ADD_PLACEMENT"; screenId: string; componentId: string; anchorId: string; rect: Rect }
+  | { type: "MAP_COMPONENTS_TO_ANCHOR"; screenId: string; anchorId: string; componentIds: string[] }
   | { type: "UPDATE_PLACEMENT_RECT"; screenId: string; componentId: string; anchorId: string; rect: Rect }
   | { type: "REMOVE_PLACEMENT"; screenId: string; componentId: string; anchorId: string }
   | { type: "DELETE_COMPONENT_EVERYWHERE"; screenId: string; componentId: string }
@@ -105,7 +92,6 @@ export function initialEditorState(): EditorState {
     saveStatus: "unsaved",
     projectDir: null,
     showOverlays: true,
-    pendingMap: null,
     undoStack: [],
     redoStack: [],
     screenImages: {},
@@ -150,7 +136,15 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
     case "NEW_PROJECT":
       return { ...initialEditorState(), project: { ...initialEditorState().project, name: action.name ?? "Untitled project" } };
 
-    case "SET_PROJECT":
+    case "SET_PROJECT": {
+      const activeScreenId = action.project.screens[0]?.id ?? null;
+      const activeScreen = activeScreenId ? getScreen(action.project, activeScreenId) : undefined;
+      const activeAnchorStillValid =
+        state.activeAnchorId != null &&
+        activeScreen?.anchors.some((a) => a.id === state.activeAnchorId);
+      const activeAnchorId = activeAnchorStillValid
+        ? state.activeAnchorId
+        : (activeScreen?.anchors[0]?.id ?? null);
       return {
         ...state,
         project: action.project,
@@ -160,10 +154,11 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
         undoStack: [],
         redoStack: [],
         selection: { kind: "none" },
-        activeAnchorId: null,
-        activeScreenId: action.project.screens[0]?.id ?? null,
+        activeAnchorId,
+        activeScreenId,
         screenImages: action.screenImages ?? {},
       };
+    }
 
     case "MARK_SAVED":
       return {
@@ -186,7 +181,7 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
       };
 
     case "SET_TOOL":
-      return { ...state, tool: action.tool, pendingMap: action.tool === "mapPlacement" ? state.pendingMap : null };
+      return { ...state, tool: action.tool };
 
     case "SET_SELECTION":
       return { ...state, selection: action.selection };
@@ -349,38 +344,48 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
       };
     }
 
-    case "START_MAP_PLACEMENT":
-      return {
-        ...state,
-        pendingMap: action.pending,
-        tool: "mapPlacement",
-      };
-
-    case "ADD_PLACEMENT": {
+    case "MAP_COMPONENTS_TO_ANCHOR": {
       const screen = getScreen(state.project, action.screenId);
-      if (!screen) return state;
-      const component = screen.components.find((c) => c.id === action.componentId);
-      if (!component) return state;
-      if (component.placements.some((p) => p.anchorId === action.anchorId)) return state;
-      const placement: Placement = { anchorId: action.anchorId, rect: action.rect };
+      const target = screen?.anchors.find((a) => a.id === action.anchorId);
+      if (!screen || !target) return state;
+
+      const additions = new Map<string, Placement>();
+      let lastComponentId: string | null = null;
+      for (const componentId of action.componentIds) {
+        const component = screen.components.find((c) => c.id === componentId);
+        if (!component) continue;
+        if (component.placements.some((p) => p.anchorId === action.anchorId)) continue;
+        const sourcePlacement = component.placements.find((p) => p.anchorId !== action.anchorId);
+        if (!sourcePlacement) continue;
+        const sourceAnchor = screen.anchors.find((a) => a.id === sourcePlacement.anchorId);
+        if (!sourceAnchor) continue;
+        additions.set(componentId, {
+          anchorId: action.anchorId,
+          rect: clampRect(
+            translateRectByAnchor(sourcePlacement.rect, sourceAnchor.rect, target.rect),
+            screen.image,
+          ),
+        });
+        lastComponentId = componentId;
+      }
+      if (additions.size === 0 || lastComponentId == null) return state;
       const next = updateScreen(state.project, action.screenId, (s) => ({
         ...s,
-        components: s.components.map((c) =>
-          c.id === action.componentId
-            ? { ...c, placements: [...c.placements, placement] }
-            : c,
-        ),
+        components: s.components.map((c) => {
+          const placement = additions.get(c.id);
+          return placement ? { ...c, placements: [...c.placements, placement] } : c;
+        }),
       }));
       return {
         ...withUndo(state, next),
-        pendingMap: null,
-        tool: "select",
+        activeAnchorId: action.anchorId,
         selection: {
           kind: "placement",
           screenId: action.screenId,
           anchorId: action.anchorId,
-          componentId: action.componentId,
+          componentId: lastComponentId,
         },
+        tool: "select",
       };
     }
 

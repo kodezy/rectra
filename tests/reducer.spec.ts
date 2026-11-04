@@ -3,6 +3,18 @@ import { editorReducer, initialEditorState } from "@core/editor/reducer";
 import { specExampleProject } from "@core/model/fixture";
 
 describe("editorReducer", () => {
+  it("SET_PROJECT selects first anchor on active screen", () => {
+    const state = editorReducer(initialEditorState(), {
+      type: "SET_PROJECT",
+      project: specExampleProject(),
+      projectDir: "/tmp/foo.rectra",
+      dirty: false,
+      screenImages: {},
+    });
+    expect(state.activeScreenId).toBe("screen-001");
+    expect(state.activeAnchorId).toBe("anchor-001");
+  });
+
   it("AC-11 remove mapping on one anchor keeps other", () => {
     let state = initialEditorState();
     state = {
@@ -74,5 +86,59 @@ describe("editorReducer", () => {
     expect(state.screenImages["screen-001"]?.bytes).toEqual(new Uint8Array([9]));
     state = editorReducer(state, { type: "UNDO" });
     expect(state.screenImages["screen-001"]?.bytes).toEqual(new Uint8Array([1, 2]));
+  });
+
+  it("maps selected components onto an anchor using existing offsets", () => {
+    let state = initialEditorState();
+    const project = specExampleProject();
+    const screen = project.screens[0]!;
+    screen.components = screen.components.map((c) => ({
+      ...c,
+      placements: c.placements.filter((p) => p.anchorId === "anchor-001"),
+    }));
+    state = { ...state, project, activeScreenId: "screen-001", activeAnchorId: "anchor-002" };
+
+    state = editorReducer(state, {
+      type: "MAP_COMPONENTS_TO_ANCHOR",
+      screenId: "screen-001",
+      anchorId: "anchor-002",
+      componentIds: ["component-001", "component-002"],
+    });
+
+    const mapped = state.project.screens[0]!.components;
+    const search = mapped.find((c) => c.id === "component-001")!;
+    const submit = mapped.find((c) => c.id === "component-002")!;
+    expect(search.placements.find((p) => p.anchorId === "anchor-002")?.rect).toEqual({
+      x: 570,
+      y: 255,
+      width: 220,
+      height: 40,
+    });
+    expect(submit.placements.find((p) => p.anchorId === "anchor-002")?.rect).toEqual({
+      x: 820,
+      y: 500,
+      width: 100,
+      height: 40,
+    });
+    expect(state.selection).toEqual({
+      kind: "placement",
+      screenId: "screen-001",
+      anchorId: "anchor-002",
+      componentId: "component-002",
+    });
+  });
+
+  it("skips components already mapped to the target anchor", () => {
+    let state = initialEditorState();
+    state = { ...state, project: specExampleProject(), activeScreenId: "screen-001" };
+    const before = structuredClone(state.project.screens[0]!.components[0]!.placements);
+    state = editorReducer(state, {
+      type: "MAP_COMPONENTS_TO_ANCHOR",
+      screenId: "screen-001",
+      anchorId: "anchor-001",
+      componentIds: ["component-001"],
+    });
+    expect(state.project.screens[0]!.components[0]!.placements).toEqual(before);
+    expect(state.dirty).toBe(false);
   });
 });

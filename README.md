@@ -30,7 +30,7 @@ npm run tauri dev
 
 1. **New** — create a project in memory.
 2. Add a screen and import a PNG or JPEG.
-3. Draw at least one **Anchor** (`A`), then map **Components** (`C`) on the active anchor. Reuse the same component on other anchors when placements differ.
+3. Draw at least one **Anchor** (`A`), then map **Components** (`C`) on the active anchor. Reuse components on other anchors with **Map component** — placements keep the existing offset.
 4. **Save** — first save chooses a folder and writes `<name>.rectra/` (`project.json` + `assets/`). Later saves update that folder. No Save As.
 5. **Export** — writes `mappings.json` and one PNG per anchor into a managed folder. Disabled until the project has an anchor. Export packages are not opened as projects.
 

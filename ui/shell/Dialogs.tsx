@@ -159,42 +159,51 @@ function MapComponentDialog({
   const screen = state.project.screens.find((s) => s.id === screenId)!;
   const anchor = screen.anchors.find((a) => a.id === anchorId);
   const options = unmappedComponentsForAnchor(screen, anchorId);
-  const [selected, setSelected] = useState(options[0]?.id ?? "");
-  const chosen = options.find((c) => c.id === selected);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+  const toggle = (id: string) => {
+    setSelectedIds((ids) =>
+      ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id],
+    );
+  };
 
   return (
     <Modal title="Map component" width={505} onClose={onClose}>
       <p className="text-[13px] text-muted">
-        Choose a component for {anchor?.name ?? "this anchor"}.
+        Choose components for {anchor?.name ?? "this anchor"}. Offsets follow each
+        component's existing mapping.
       </p>
       <p className="mt-6 text-[11px] font-semibold tracking-[0.06em] text-subtle">AVAILABLE</p>
       {options.length === 0 ? (
         <p className="mt-3 text-[13px] text-muted">All components are mapped to this anchor</p>
       ) : (
         <div className="mt-2 max-h-40 space-y-1 overflow-auto">
-          {options.map((c) => (
-            <button
-              key={c.id}
-              type="button"
-              className={`flex w-full items-center gap-3 rounded-[5px] px-3 py-2.5 text-left ${
-                selected === c.id ? "bg-selected" : "hover:bg-selected/40"
-              }`}
-              onClick={() => setSelected(c.id)}
-            >
-              <span className="flex h-4 w-4 items-center justify-center rounded-[3px] border border-border text-[10px]">
-                {selected === c.id ? "■" : ""}
-              </span>
-              <span>
-                <span className="block text-[13px] font-medium">{c.name}</span>
-                <span className="text-[12px] text-muted">
-                  {c.type === "bbox" ? "BBox" : "Coord"}  ·  available
+          {options.map((c) => {
+            const checked = selectedIds.includes(c.id);
+            return (
+              <button
+                key={c.id}
+                type="button"
+                aria-pressed={checked}
+                className={`flex w-full items-center gap-3 rounded-[5px] px-3 py-2.5 text-left ${
+                  checked ? "bg-selected" : "hover:bg-selected/40"
+                }`}
+                onClick={() => toggle(c.id)}
+              >
+                <span className="flex h-4 w-4 items-center justify-center rounded-[3px] border border-border text-[10px]">
+                  {checked ? "■" : ""}
                 </span>
-              </span>
-            </button>
-          ))}
+                <span>
+                  <span className="block text-[13px] font-medium">{c.name}</span>
+                  <span className="text-[12px] text-muted">
+                    {c.type === "bbox" ? "BBox" : "Coord"}
+                  </span>
+                </span>
+              </button>
+            );
+          })}
         </div>
       )}
-      <p className="mt-4 text-[13px] text-muted">Then draw its region on the image.</p>
       <div className="mt-6 flex justify-end gap-2 border-t border-border pt-5">
         <Button className="min-w-[105px]" onClick={onClose}>
           Cancel
@@ -202,16 +211,18 @@ function MapComponentDialog({
         <Button
           variant="primary"
           className="min-w-[105px]"
-          disabled={!chosen}
+          disabled={selectedIds.length === 0}
           onClick={() => {
             dispatch({
-              type: "START_MAP_PLACEMENT",
-              pending: { screenId, anchorId, componentId: selected },
+              type: "MAP_COMPONENTS_TO_ANCHOR",
+              screenId,
+              anchorId,
+              componentIds: selectedIds,
             });
             onClose();
           }}
         >
-          Continue
+          Map
         </Button>
       </div>
     </Modal>
