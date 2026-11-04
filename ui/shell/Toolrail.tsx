@@ -7,7 +7,7 @@ export function Toolrail() {
   const { state, dispatch } = useEditor();
   const { compact } = useUi();
   const componentDisabled = !state.activeAnchorId;
-  const componentActive = state.tool === "component" || state.tool === "mapPlacement";
+  const componentActive = state.tool === "component";
   const slot = compact ? 34 : 38;
   const width = toolrailWidth(compact);
 

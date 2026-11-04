@@ -141,3 +141,16 @@ export function offsetValues(
     [dx2, dy2],
   ];
 }
+
+export function translateRectByAnchor(
+  placement: Rect,
+  sourceAnchor: Rect,
+  targetAnchor: Rect,
+): Rect {
+  return {
+    x: placement.x + (targetAnchor.x - sourceAnchor.x),
+    y: placement.y + (targetAnchor.y - sourceAnchor.y),
+    width: placement.width,
+    height: placement.height,
+  };
+}

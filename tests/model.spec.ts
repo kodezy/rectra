@@ -4,6 +4,7 @@ import {
   offsetValues,
   rectFromDragEndpoints,
   specExampleProject,
+  translateRectByAnchor,
   validateProject,
 } from "@core/model";
 
@@ -50,5 +51,17 @@ describe("spec example offsets AC-03–AC-05", () => {
 describe("geometry", () => {
   it("rejects sub 1x1 drag", () => {
     expect(rectFromDragEndpoints(10, 10, 10, 10, { width: 100, height: 100 })).toBeNull();
+  });
+
+  it("translates a placement by the delta between anchors", () => {
+    const sourceAnchor = { x: 200, y: 100, width: 90, height: 30 };
+    const targetAnchor = { x: 420, y: 200, width: 90, height: 30 };
+    const placement = { x: 350, y: 155, width: 220, height: 40 };
+    expect(translateRectByAnchor(placement, sourceAnchor, targetAnchor)).toEqual({
+      x: 570,
+      y: 255,
+      width: 220,
+      height: 40,
+    });
   });
 });

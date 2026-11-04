@@ -85,7 +85,7 @@ export function EditorCanvas({
   const imageX = fit.x + offsetX;
   const imageY = fit.y + offsetY;
   const panning = state.tool === "pan" || spacePan;
-  const drawing = ["anchor", "component", "mapPlacement"].includes(state.tool);
+  const drawing = ["anchor", "component"].includes(state.tool);
   const overlayInteract = !drawing && !panning && !canvasLocked;
 
   const activeAnchorId = state.activeAnchorId;
@@ -200,16 +200,6 @@ export function EditorCanvas({
         type: "CREATE_COMPONENT",
         screenId: screen.id,
         anchorId: activeAnchorId,
-        rect,
-      });
-      return;
-    }
-    if (state.tool === "mapPlacement" && state.pendingMap) {
-      dispatch({
-        type: "ADD_PLACEMENT",
-        screenId: state.pendingMap.screenId,
-        componentId: state.pendingMap.componentId,
-        anchorId: state.pendingMap.anchorId,
         rect,
       });
     }
