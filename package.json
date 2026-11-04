@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "tauri": "tauri",
+    "tauri": "TAURI_APP_PATH=native tauri",
     "test": "vitest run",
     "test:watch": "vitest"
   },

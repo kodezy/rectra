@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fileActionTitle, fileShortcut, modLabel } from "../ui/app/shortcuts";
+import { fileActionTitle, fileShortcut, modLabel } from "@ui/shell/shortcuts";
 
 function key(
   key: string,

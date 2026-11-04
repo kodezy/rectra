@@ -27,8 +27,8 @@ lerna-debug.log*
 !.env.example
 
 # Rust / Tauri
-src-tauri/target/
-src-tauri/gen/schemas/
+native/target/
+native/gen/schemas/
 
 # OS
 .DS_Store

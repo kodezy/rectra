@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import type { Project, Screen, ScreenImageMem } from "../ui/model/types";
+import type { Project, Screen, ScreenImageMem } from "@core/model/types";
 import {
   applySavedScreenAssets,
   isExportMappingsDocument,
   isProjectDocument,
   shouldWriteScreenAsset,
-} from "../ui/persistence/saveLogic";
+} from "@core/persistence/saveLogic";
 
 const screen: Screen = {
   id: "s1",
@@ -27,6 +27,7 @@ describe("saveLogic", () => {
 
   it("applySavedScreenAssets clears pendingWrite", () => {
     const project: Project = {
+      formatVersion: 1,
       id: "p",
       name: "P",
       screens: [screen],

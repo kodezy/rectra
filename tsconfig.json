@@ -18,8 +18,13 @@
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+
+    "paths": {
+      "@core/*": ["./core/*"],
+      "@ui/*": ["./ui/*"]
+    }
   },
-  "include": ["ui"],
+  "include": ["core", "ui", "tests"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

@@ -4,15 +4,15 @@ import {
   confirmDeleteComponentEverywhere,
   handleDeleteSelection,
 } from "./deleteActions";
-import { placementCountForAnchor } from "../editor/reducer";
+import { placementCountForAnchor } from "@core/editor/reducer";
 import {
   normalizeName,
   validateAnchorName,
   validateComponentName,
   validateScreenName,
-} from "../model/names";
-import { newId } from "../model/types";
-import { decodeImageDimensions, pickImageFile } from "../persistence/project";
+} from "@core/model/names";
+import { newId } from "@core/model/types";
+import { decodeImageDimensions, pickImageFile } from "@core/persistence/project";
 import { ContextMenu, type ContextMenuItem } from "./ContextMenu";
 import { useUi } from "./ui-context";
 

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { EditorCanvas } from "../editor/canvas/EditorCanvas";
 import { useEditor } from "../editor/context";
-import { projectHasAnchor } from "../model";
+import { projectHasAnchor } from "@core/model";
 import { DialogLayer } from "./Dialogs";
 import { Explorer } from "./Explorer";
 import { FooterBar, Toolbar } from "./Toolbar";
@@ -25,7 +25,7 @@ import {
   pickImageFile,
   pickOpenProjectDir,
   saveProject,
-} from "../persistence/project";
+} from "@core/persistence/project";
 
 export function Workspace() {
   const { state, dispatch } = useEditor();

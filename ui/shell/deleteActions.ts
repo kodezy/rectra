@@ -1,6 +1,9 @@
-import type { EditorAction, EditorState } from "../editor/reducer";
-import { placementCountForAnchor } from "../editor/reducer";
-import type { Screen } from "../model/types";
+import {
+  type EditorAction,
+  type EditorState,
+  placementCountForAnchor,
+} from "@core/editor/reducer";
+import type { Screen } from "@core/model/types";
 import type { DialogState } from "./dialogState";
 
 type Dispatch = (action: EditorAction) => void;

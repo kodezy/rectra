@@ -1,3 +1,4 @@
+import path from "node:path";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
@@ -8,6 +9,12 @@ const host = process.env.TAURI_DEV_HOST;
 
 export default defineConfig(() => ({
   plugins: [react(), tailwindcss()],
+  resolve: {
+    alias: {
+      "@core": path.resolve("core"),
+      "@ui": path.resolve("ui"),
+    },
+  },
   test: {
     environment: "node",
     include: ["tests/**/*.spec.ts"],
@@ -25,7 +32,7 @@ export default defineConfig(() => ({
         }
       : undefined,
     watch: {
-      ignored: ["**/src-tauri/**"],
+      ignored: ["**/native/**"],
     },
   },
 }));

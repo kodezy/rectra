@@ -6,16 +6,16 @@ import {
   imagePointFromStage,
   rectFromDragEndpoints,
   type Rect as GeoRect,
-} from "../../model/geometry";
-import type { Screen } from "../../model/types";
+} from "@core/model/geometry";
+import type { Screen } from "@core/model/types";
 import { useEditor } from "../context";
-import type { Viewport } from "../reducer";
+import type { Viewport } from "@core/editor/reducer";
 import {
   clampViewportPan,
   fitImageInHost,
   stepUserScale,
   zoomToward,
-} from "../viewport";
+} from "@core/editor/viewport";
 
 type Props = {
   screen: Screen;

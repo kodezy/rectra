@@ -1,6 +1,6 @@
 # Architecture
 
-Rectra is a desktop editor (Tauri 2 + React/TypeScript/Vite) that maps UI components onto screenshots. Domain logic lives in TypeScript under `ui/`. The Rust crate in `src-tauri/` is the Tauri shell: window, dialog, and filesystem plugins. No HTTP, database, or custom IPC commands.
+Rectra is a desktop editor (Tauri 2 + React/TypeScript/Vite) that maps UI components onto screenshots. Application logic lives in `core/` (pure TypeScript). Presentation lives in `ui/` (React/Konva). The Rust crate in `native/` is the Tauri shell: window, dialog, and filesystem plugins. No HTTP, database, or custom IPC commands.
 
 ## Vocabulary
 
@@ -14,20 +14,28 @@ Rectra is a desktop editor (Tauri 2 + React/TypeScript/Vite) that maps UI compon
 | Model B | Offsets derived at read/export from `placement.rect` vs `anchor.rect` |
 | `.rectra` | Saved package: `project.json` + `assets/` |
 | Export | `mappings.json` + `templates/` PNGs into a managed output folder |
+| **ui** | Presentation layer (React) |
+| **core** | Application logic (no React) |
+| **native** | Desktop platform shell (Tauri + Rust) |
+| **shell** | Workspace chrome inside `ui/shell/` |
+| **native/src** | Cargo crate root (Rust only; not frontend source) |
 
 ## Layout
 
 ```
-ui/model/            types, geometry, names, validate, export mappings
-ui/editor/           session reducer, undo snapshots, Konva canvas
-ui/app/              workspace shell (Explorer, Inspector, toolbar, dialogs)
-ui/persistence/      open/save `.rectra`, export package, path helpers
-src-tauri/           Tauri 2 window + dialog/fs/opener plugins
-tests/               Vitest: model, reducer, saveLogic, layout
-docs/product/        product spec (behavior)
+core/model/            types, geometry, names, validate, export mappings
+core/editor/           session reducer, viewport math, undo snapshots
+core/persistence/      open/save `.rectra`, export package, path helpers
+ui/shell/              workspace (Explorer, Inspector, toolbar, dialogs)
+ui/editor/             React context + Konva canvas
+native/                Tauri 2 window + dialog/fs/opener plugins
+tests/                 Vitest: model, reducer, saveLogic, layout
+docs/product/          product spec (behavior)
 ```
 
-Dependency direction: `model` has no imports from `app`, `editor`, or `persistence`. `editor` imports `model`. `persistence` imports `model` and `EditorState` from `editor/reducer`. `app` imports all three.
+Import aliases (tsconfig + Vite): `@core/*`, `@ui/*`.
+
+Dependency direction: `core/model` imports nothing from `ui`, `core/editor`, or `core/persistence`. `core/editor` imports `core/model`. `core/persistence` imports `core/model` and `EditorState` from `core/editor/reducer`. `ui` imports `core` only (not `native`).
 
 ## Runtime
 
@@ -51,12 +59,12 @@ Dependency direction: `model` has no imports from `app`, `editor`, or `persisten
 ## Limits
 
 - No product plugins, telemetry, multi-screenshot-per-screen, snap/grid, or Save As.
-- `src-tauri/src/lib.rs` registers dialog, fs, and opener; no domain commands. Opener is unused from the UI.
+- `native/src/lib.rs` registers dialog, fs, and opener; no domain commands. Opener is unused from the UI.
 - No CI workflow in this repo.
 
 ## Commands
 
-From `package.json` / `src-tauri/tauri.conf.json`:
+From `package.json` / `native/tauri.conf.json` (`TAURI_APP_PATH=native` for npm scripts):
 
 ```
 npm install
@@ -68,4 +76,4 @@ npm run tauri dev     # desktop app
 npm run tauri build
 ```
 
-Icon set: `npx tauri icon src-tauri/app-icon.svg` writes `src-tauri/icons/`. Dock on macOS follows a rebuilt `src-tauri/target/debug/rectra`, not the Vite HMR session.
+Icon set: `npx tauri icon native/app-icon.svg` writes `native/icons/`. Dock on macOS follows a rebuilt `native/target/debug/rectra`, not the Vite HMR session.

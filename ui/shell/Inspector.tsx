@@ -5,14 +5,14 @@ import {
   isRectValid,
   offsetValues,
   type Rect,
-} from "../model/geometry";
+} from "@core/model/geometry";
 import {
   normalizeName,
   validateAnchorName,
   validateComponentName,
   validateScreenName,
-} from "../model/names";
-import type { ComponentType } from "../model/types";
+} from "@core/model/names";
+import type { ComponentType } from "@core/model/types";
 import { Button } from "./components/Button";
 import { handleDeleteSelection } from "./deleteActions";
 import { useActiveScreen, useUi } from "./ui-context";

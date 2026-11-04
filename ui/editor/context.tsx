@@ -4,7 +4,7 @@ import {
   initialEditorState,
   type EditorAction,
   type EditorState,
-} from "./reducer";
+} from "@core/editor/reducer";
 
 type EditorContextValue = {
   state: EditorState;

@@ -1,6 +1,6 @@
 import { useEditor } from "../editor/context";
-import { totalMappingsOnScreen } from "../editor/reducer";
-import { clampViewportPan, fitImageInHost, stepUserScale, zoomToward } from "../editor/viewport";
+import { totalMappingsOnScreen } from "@core/editor/reducer";
+import { clampViewportPan, fitImageInHost, stepUserScale, zoomToward } from "@core/editor/viewport";
 import { ToolButton } from "./components/Button";
 import { CANVAS_TOOLBAR_HEIGHT, FOOTER_HEIGHT } from "./layout";
 import { useActiveScreen } from "./ui-context";

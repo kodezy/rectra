@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { readFile } from "@tauri-apps/plugin-fs";
 import { useEditor } from "../editor/context";
-import { joinPath } from "../persistence/paths";
+import { joinPath } from "@core/persistence/paths";
 
 function screenImageBlob(bytes: Uint8Array): Blob {
   return new Blob([Uint8Array.from(bytes)]);

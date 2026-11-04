@@ -15,7 +15,7 @@ import {
   inspectorDefaultWidth,
   isCompactWidth,
   toolrailWidth,
-} from "../ui/app/layout";
+} from "@ui/shell/layout";
 
 describe("Penpot layout tokens AC-42", () => {
   it("uses header 56 and footer 28", () => {

@@ -68,7 +68,7 @@ npm run dev           # Vite UI only (port 1420); file dialogs need the Tauri ap
 
 There is no ESLint or CI workflow in this repo. VS Code recommendations: Tauri and rust-analyzer (see `.vscode/extensions.json`).
 
-Behavior: [`docs/product/rectra_product_spec_v0_4.md`](docs/product/rectra_product_spec_v0_4.md). Module layout: [`ARCHITECTURE.md`](ARCHITECTURE.md).
+Behavior: [`docs/product/rectra_product_spec_v0_4.md`](docs/product/rectra_product_spec_v0_4.md). Module layout (`ui/`, `core/`, `native/`): [`ARCHITECTURE.md`](ARCHITECTURE.md).
 
 ## Limitations
 

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useEditor } from "../editor/context";
-import { projectHasAnchor } from "../model";
-import { normalizeName } from "../model/names";
+import { projectHasAnchor } from "@core/model";
+import { normalizeName } from "@core/model/names";
 import { Button } from "./components/Button";
 import { HEADER_HEIGHT } from "./layout";
 import { Logo } from "./Logo";

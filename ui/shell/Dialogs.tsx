@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useEditor } from "../editor/context";
-import { unmappedComponentsForAnchor } from "../editor/reducer";
-import { exportMappingsPackage } from "../persistence/exportPackage";
-import { pickExportDir } from "../persistence/project";
+import { unmappedComponentsForAnchor } from "@core/editor/reducer";
+import { exportMappingsPackage } from "@core/persistence/exportPackage";
+import { pickExportDir } from "@core/persistence/project";
 import { Button } from "./components/Button";
 import { useUi } from "./ui-context";
 

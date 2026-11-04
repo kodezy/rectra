@@ -1,6 +1,6 @@
 import { EditorProvider } from "./editor/context";
-import { UiProvider } from "./app/ui-context";
-import { Workspace } from "./app/Workspace";
+import { UiProvider } from "./shell/ui-context";
+import { Workspace } from "./shell/Workspace";
 
 export default function App() {
   return (
