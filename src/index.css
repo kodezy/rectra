@@ -1,0 +1,64 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --color-background: #101216;
+  --color-surface: #17191d;
+  --color-panel: #181b20;
+  --color-input: #1e2229;
+  --color-selected: #30343a;
+  --color-border: #30343b;
+  --color-text: #f0f1f2;
+  --color-muted: #949ba6;
+  --color-subtle: #84909b;
+  --color-primary: #ffffff;
+  --color-on-primary: #101216;
+  --color-destructive: #e38188;
+  --color-canvas: #111419;
+  --color-row: #242932;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --spacing-header: 56px;
+  --spacing-footer: 28px;
+  --spacing-explorer: 240px;
+  --spacing-explorer-compact: 208px;
+  --spacing-inspector: 296px;
+  --spacing-inspector-compact: 256px;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--color-text);
+  background: var(--color-background);
+  overflow: hidden;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: default;
+}
+
+input,
+select,
+textarea {
+  font-family: inherit;
+  color: var(--color-text);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--color-text);
+}
