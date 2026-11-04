@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Layer, Rect, Stage, Image as KonvaImage, Transformer } from "react-konva";
 import type Konva from "konva";
 import {
@@ -9,6 +9,12 @@ import {
 } from "../../model/geometry";
 import type { Screen } from "../../model/types";
 import { useEditor } from "../context";
+import type { Viewport } from "../reducer";
+import {
+  fitImageInHost,
+  stepUserScale,
+  zoomToward,
+} from "../viewport";
 
 type Props = {
   screen: Screen;
@@ -28,18 +34,23 @@ export function EditorCanvas({ screen, imageUrl, width, height, onCursor }: Prop
   const [draftRect, setDraftRect] = useState<GeoRect | null>(null);
   const [spacePan, setSpacePan] = useState(false);
   const panLast = useRef<{ x: number; y: number } | null>(null);
+  const viewportRef = useRef(state.viewport);
+
+  viewportRef.current = state.viewport;
 
   const { scale, offsetX, offsetY } = state.viewport;
   const imageW = screen.image.width;
   const imageH = screen.image.height;
 
-  const fit = useMemo(() => {
-    if (width <= 0 || height <= 0) return { scale: 1, x: 0, y: 0 };
-    const s = Math.min(width / imageW, height / imageH, 2);
-    const x = (width - imageW * s) / 2;
-    const y = (height - imageH * s) / 2;
-    return { scale: s, x, y };
-  }, [width, height, imageW, imageH]);
+  const fit = useMemo(
+    () => fitImageInHost(width, height, imageW, imageH),
+    [width, height, imageW, imageH],
+  );
+
+  const applyViewport = useCallback((next: Viewport) => {
+    viewportRef.current = next;
+    dispatch({ type: "SET_VIEWPORT", viewport: next });
+  }, [dispatch]);
 
   const displayScale = scale * fit.scale;
   const imageX = fit.x + offsetX;
@@ -74,11 +85,41 @@ export function EditorCanvas({ screen, imageUrl, width, height, onCursor }: Prop
 
   useEffect(() => {
     const onFit = () => {
-      dispatch({ type: "SET_VIEWPORT", viewport: { scale: 1, offsetX: 0, offsetY: 0 } });
+      applyViewport({ scale: 1, offsetX: 0, offsetY: 0 });
     };
     window.addEventListener("rectra:fit", onFit);
     return () => window.removeEventListener("rectra:fit", onFit);
-  }, [dispatch]);
+  }, [applyViewport]);
+
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage) return;
+    const container = stage.container();
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const v = viewportRef.current;
+      if (e.ctrlKey || e.metaKey) {
+        const pointer = stage.getPointerPosition();
+        const rect = container.getBoundingClientRect();
+        const pivot = pointer ?? {
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top,
+        };
+        const direction: -1 | 1 = e.deltaY > 0 ? -1 : 1;
+        const next = zoomToward(v, fit, pivot, stepUserScale(v.scale, direction));
+        if (next === v) return;
+        applyViewport(next);
+        return;
+      }
+      applyViewport({
+        ...v,
+        offsetX: v.offsetX - e.deltaX,
+        offsetY: v.offsetY - e.deltaY,
+      });
+    };
+    container.addEventListener("wheel", onWheel, { passive: false });
+    return () => container.removeEventListener("wheel", onWheel);
+  }, [applyViewport, fit, width, height]);
 
   const selection = state.selection;
   const selectedPlacement =
@@ -181,9 +222,11 @@ export function EditorCanvas({ screen, imageUrl, width, height, onCursor }: Prop
           const dx = e.evt.clientX - panLast.current.x;
           const dy = e.evt.clientY - panLast.current.y;
           panLast.current = { x: e.evt.clientX, y: e.evt.clientY };
-          dispatch({
-            type: "SET_VIEWPORT",
-            viewport: { offsetX: offsetX + dx, offsetY: offsetY + dy },
+          const v = viewportRef.current;
+          applyViewport({
+            ...v,
+            offsetX: v.offsetX + dx,
+            offsetY: v.offsetY + dy,
           });
           return;
         }
@@ -200,13 +243,6 @@ export function EditorCanvas({ screen, imageUrl, width, height, onCursor }: Prop
       onMouseLeave={() => {
         panLast.current = null;
         onCursor?.(null);
-      }}
-      onWheel={(e) => {
-        if (!e.evt.ctrlKey && !e.evt.metaKey) return;
-        e.evt.preventDefault();
-        const dir = e.evt.deltaY > 0 ? -0.1 : 0.1;
-        const next = Math.min(2, Math.max(0.5, Math.round((scale + dir) * 10) / 10));
-        dispatch({ type: "SET_VIEWPORT", viewport: { scale: next } });
       }}
       onClick={(e) => {
         if (state.tool !== "select" || panning) return;

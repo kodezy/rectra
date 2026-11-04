@@ -1,13 +1,38 @@
 import { useEditor } from "../editor/context";
 import { totalMappingsOnScreen } from "../editor/reducer";
+import { fitImageInHost, stepUserScale, zoomToward } from "../editor/viewport";
 import { ToolButton } from "./components/Button";
 import { FOOTER_HEIGHT } from "./layout";
 import { useActiveScreen } from "./ui-context";
 
-export function Toolbar() {
+type ToolbarProps = {
+  canvasSize: { width: number; height: number };
+};
+
+export function Toolbar({ canvasSize }: ToolbarProps) {
   const { state, dispatch } = useEditor();
+  const screen = useActiveScreen();
   const componentDisabled = !state.activeAnchorId;
   const componentActive = state.tool === "component" || state.tool === "mapPlacement";
+
+  const zoomStep = (direction: -1 | 1) => {
+    if (!screen) return;
+    const fit = fitImageInHost(
+      canvasSize.width,
+      canvasSize.height,
+      screen.image.width,
+      screen.image.height,
+    );
+    const pivot = { x: canvasSize.width / 2, y: canvasSize.height / 2 };
+    const next = zoomToward(
+      state.viewport,
+      fit,
+      pivot,
+      stepUserScale(state.viewport.scale, direction),
+    );
+    if (next === state.viewport) return;
+    dispatch({ type: "SET_VIEWPORT", viewport: next });
+  };
 
   return (
     <div className="flex h-[50px] shrink-0 items-center border-b border-border bg-canvas px-4">
@@ -53,12 +78,7 @@ export function Toolbar() {
         <button
           type="button"
           className="px-2 text-[12px] text-muted hover:text-text"
-          onClick={() =>
-            dispatch({
-              type: "SET_VIEWPORT",
-              viewport: { scale: Math.max(0.5, Math.round((state.viewport.scale - 0.1) * 10) / 10) },
-            })
-          }
+          onClick={() => zoomStep(-1)}
         >
           −
         </button>
@@ -68,12 +88,7 @@ export function Toolbar() {
         <button
           type="button"
           className="px-2 text-[12px] text-muted hover:text-text"
-          onClick={() =>
-            dispatch({
-              type: "SET_VIEWPORT",
-              viewport: { scale: Math.min(2, Math.round((state.viewport.scale + 0.1) * 10) / 10) },
-            })
-          }
+          onClick={() => zoomStep(1)}
         >
           +
         </button>
