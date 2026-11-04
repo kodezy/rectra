@@ -11,7 +11,7 @@ npm run build
 npm run tauri dev
 ```
 
-`npm run tauri build` packages the app. Tests: Vitest, `tests/**/*.spec.ts`. No ESLint/CI in-repo.
+`npm run tauri build` packages the app. Tests: Vitest, `tests/**/*.spec.ts`. CI: `.github/workflows/ci.yml` runs `npm test` and `npm run build`. No ESLint in-repo.
 
 ## Core invariants
 

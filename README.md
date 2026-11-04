@@ -49,7 +49,7 @@ npm run build         # `tsc` and Vite → `dist/`
 npm run dev           # Vite on port 1420; dialogs need `npm run tauri dev`
 ```
 
-No ESLint or CI in this repo.
+CI (`.github/workflows/ci.yml`) runs `npm test` and `npm run build` on push and pull requests. No ESLint.
 
 ## Docs
 
