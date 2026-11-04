@@ -4,9 +4,9 @@
 
 # Rectra
 
-Desktop editor that maps UI components onto screenshots and exports relative coordinates plus PNG templates. It does not capture windows, run automations, or detect objects.
+Desktop editor that maps UI components onto screenshots and exports relative coordinates plus PNG templates.
 
-Anchors are reference regions on the screenshot; logical components (`coord` or `bbox`) get one rectangle per anchor, with offsets derived at export—not stored in the project. Tauri 2, React, TypeScript, Vite, and Konva. UI copy is English.
+Tauri 2, React, TypeScript, Vite, and Konva.
 
 ## Preview
 
@@ -16,7 +16,7 @@ Anchors are reference regions on the screenshot; logical components (`coord` or 
 
 ## Setup
 
-**Node.js** with **npm**, plus **Rust** [edition 2024](https://doc.rust-lang.org/edition-guide/rust-2024/index.html) (1.85+) and the [Tauri 2 prerequisites](https://v2.tauri.app/start/prerequisites/) for your OS.
+Install **Node.js** with **npm**, plus **Rust** [edition 2024](https://doc.rust-lang.org/edition-guide/rust-2024/index.html) (1.85+) and the [Tauri 2 prerequisites](https://v2.tauri.app/start/prerequisites/) for your OS.
 
 ```bash
 npm install
@@ -28,36 +28,41 @@ npm install
 npm run tauri dev
 ```
 
-1. **New** — create a project in memory.
+1. **New** creates a project in memory.
 2. Add a screen and import a PNG or JPEG.
-3. Draw at least one **Anchor** (`A`), then map **Components** (`C`) on the active anchor. Reuse components on other anchors with **Map component** — placements keep the existing offset.
-4. **Save** — first save chooses a folder and writes `<name>.rectra/` (`project.json` + `assets/`). Later saves update that folder. No Save As.
-5. **Export** — writes `mappings.json` and one PNG per anchor into a managed folder. Disabled until the project has an anchor. Export packages are not opened as projects.
+3. Draw at least one **Anchor** (`A`).
+4. Map **Components** (`C`) on the active anchor.
+5. To reuse a component on another anchor, use **Map component**. The new placement keeps the existing offset.
+6. **Save** asks for a parent folder the first time and writes `<name>.rectra/` (`project.json` and `assets/`). Later saves update that folder.
+7. **Export** writes `mappings.json` and one PNG per anchor into an empty folder or an export folder the app already manages. It stays disabled until the project has an anchor.
 
-```bash
-npm run tauri build
-```
+There is no Save As. Export packages cannot be opened as projects.
 
-Canvas shortcuts do not run while an input, textarea, select, or dialog is focused; file shortcuts (`Ctrl/Cmd+N`, `O`, `S`, `E`) still do. Component mapping requires a selected anchor.
+File shortcuts (`Ctrl/Cmd+N`, `O`, `S`, `E`) still run while an input, textarea, or select is focused. They do not run while a dialog is open. Canvas shortcuts do not run in either case. The component tool requires an active anchor.
 
 ## Development
 
 ```bash
-npm test              # Vitest (`tests/**/*.spec.ts`)
+npm test
 npm run test:watch
-npm run build         # `tsc` and Vite → `dist/`
-npm run dev           # Vite on port 1420; dialogs need `npm run tauri dev`
+npm run build
+npm run tauri build
 ```
 
-CI (`.github/workflows/ci.yml`) runs `npm test` and `npm run build` on push and pull requests. No ESLint.
+`npm test` runs Vitest (`tests/**/*.spec.ts`). `npm run build` runs `tsc` and Vite into `dist/`.
+
+`npm run dev` starts Vite on port 1420. Native file dialogs need `npm run tauri dev`.
+
+CI (`.github/workflows/ci.yml`) runs `npm test` and `npm run build` on push to `main` and on pull requests. No ESLint.
 
 ## Docs
 
-[`ARCHITECTURE.md`](ARCHITECTURE.md) — modules and boundaries. Penpot `Rectra · UI` — behavior and interface copy.
+- [ARCHITECTURE.md](ARCHITECTURE.md) — modules, vocabulary, and boundaries
 
 ## Limitations
 
-- One screenshot per screen (PNG/JPEG); replace only when dimensions match.
+- One screenshot per screen (PNG/JPEG). Replace only when the new image has the same dimensions.
 - No snap, grid, multi-select, Save As, plugins, network, or telemetry.
 - Undo does not restore deleted files on disk.
-- Export only into folders the app manages (`mappings.json` + `templates/`).
+- Export only into empty folders or folders the app manages (`mappings.json` and `templates/`).
+- UI copy is English.
