@@ -16,6 +16,13 @@ import {
   stepUserScale,
   zoomToward,
 } from "@core/editor/viewport";
+import { OverlayLabel } from "./OverlayLabel";
+import {
+  overlayCornerRadius,
+  overlayHandle,
+  overlaySelected,
+  overlayStroke,
+} from "./overlayStyle";
 
 type Props = {
   screen: Screen;
@@ -42,6 +49,7 @@ export function EditorCanvas({
   const [drawStart, setDrawStart] = useState<{ x: number; y: number } | null>(null);
   const [draftRect, setDraftRect] = useState<GeoRect | null>(null);
   const [spacePan, setSpacePan] = useState(false);
+  const [liveBox, setLiveBox] = useState<{ x: number; y: number } | null>(null);
   const panLast = useRef<{ x: number; y: number } | null>(null);
   const viewportRef = useRef(state.viewport);
 
@@ -78,6 +86,7 @@ export function EditorCanvas({
   const imageY = fit.y + offsetY;
   const panning = state.tool === "pan" || spacePan;
   const drawing = ["anchor", "component", "mapPlacement"].includes(state.tool);
+  const overlayInteract = !drawing && !panning && !canvasLocked;
 
   const activeAnchorId = state.activeAnchorId;
 
@@ -162,9 +171,12 @@ export function EditorCanvas({
     const tr = transformerRef.current;
     const node = selectedNodeRef.current;
     if (!tr) return;
-    tr.nodes(node ? [node] : []);
+    const attach =
+      state.showOverlays && state.tool === "select" && !canvasLocked && node ? [node] : [];
+    tr.nodes(attach);
     tr.getLayer()?.batchDraw();
-  }, [selection, displayScale, imageX, imageY, state.showOverlays]);
+    setLiveBox(null);
+  }, [selection, displayScale, imageX, imageY, state.showOverlays, state.tool, canvasLocked]);
 
   const placementsToShow = screen.components.flatMap((c) =>
     c.placements
@@ -203,6 +215,10 @@ export function EditorCanvas({
     }
   };
 
+  const syncLiveBox = (node: Konva.Rect) => {
+    setLiveBox({ x: node.x(), y: node.y() });
+  };
+
   const commitTransform = (node: Konva.Rect, kind: "anchor" | "placement", ids: { anchorId: string; componentId?: string }) => {
     const rect = clampRect(
       {
@@ -215,6 +231,7 @@ export function EditorCanvas({
     );
     node.scaleX(1);
     node.scaleY(1);
+    setLiveBox(null);
     if (kind === "anchor") {
       dispatch({
         type: "UPDATE_ANCHOR_RECT",
@@ -232,6 +249,68 @@ export function EditorCanvas({
       });
     }
   };
+
+  const selectAnchor = (anchorId: string) => {
+    dispatch({
+      type: "SET_SELECTION",
+      selection: { kind: "anchor", screenId: screen.id, anchorId },
+    });
+    dispatch({ type: "SET_ACTIVE_ANCHOR", screenId: screen.id, anchorId });
+  };
+
+  const selectPlacement = (anchorId: string, componentId: string) => {
+    dispatch({
+      type: "SET_SELECTION",
+      selection: { kind: "placement", screenId: screen.id, anchorId, componentId },
+    });
+  };
+
+  const overlayBoxes = state.showOverlays
+    ? [
+        ...screen.anchors.map((anchor) => {
+          const selected =
+            selection.kind === "anchor" &&
+            selection.anchorId === anchor.id &&
+            selection.screenId === screen.id;
+          return {
+            key: anchor.id,
+            name: anchor.name,
+            selected,
+            stroke: overlayStroke("anchor", selected, anchor.id === activeAnchorId),
+            x: imageX + anchor.rect.x * displayScale,
+            y: imageY + anchor.rect.y * displayScale,
+            width: anchor.rect.width * displayScale,
+            height: anchor.rect.height * displayScale,
+            onSelect: () => selectAnchor(anchor.id),
+            onCommit: (node: Konva.Rect) =>
+              commitTransform(node, "anchor", { anchorId: anchor.id }),
+          };
+        }),
+        ...(activeAnchorId
+          ? placementsToShow.map(({ component, placement }) => {
+              const selected =
+                selectedPlacement?.componentId === component.id &&
+                selectedPlacement.anchorId === placement.anchorId;
+              return {
+                key: `${component.id}-${placement.anchorId}`,
+                name: component.name,
+                selected,
+                stroke: overlayStroke("placement", selected),
+                x: imageX + placement.rect.x * displayScale,
+                y: imageY + placement.rect.y * displayScale,
+                width: placement.rect.width * displayScale,
+                height: placement.rect.height * displayScale,
+                onSelect: () => selectPlacement(placement.anchorId, component.id),
+                onCommit: (node: Konva.Rect) =>
+                  commitTransform(node, "placement", {
+                    anchorId: placement.anchorId,
+                    componentId: component.id,
+                  }),
+              };
+            })
+          : []),
+      ]
+    : [];
 
   return (
     <Stage
@@ -295,108 +374,50 @@ export function EditorCanvas({
             listening={false}
           />
         )}
-        {state.showOverlays &&
-          screen.anchors.map((anchor) => {
-            const selected =
-              selection.kind === "anchor" &&
-              selection.anchorId === anchor.id &&
-              selection.screenId === screen.id;
-            return (
-              <Rect
-                key={anchor.id}
-                ref={selected ? selectedNodeRef : undefined}
-                x={imageX + anchor.rect.x * displayScale}
-                y={imageY + anchor.rect.y * displayScale}
-                width={anchor.rect.width * displayScale}
-                height={anchor.rect.height * displayScale}
-                stroke={selected ? "#FFFFFF" : "#949BA6"}
-                strokeWidth={selected ? 2 : 1}
-                fill="rgba(255,255,255,0.02)"
-                onClick={(ev) => {
-                  ev.cancelBubble = true;
-                  dispatch({
-                    type: "SET_SELECTION",
-                    selection: { kind: "anchor", screenId: screen.id, anchorId: anchor.id },
-                  });
-                  dispatch({
-                    type: "SET_ACTIVE_ANCHOR",
-                    screenId: screen.id,
-                    anchorId: anchor.id,
-                  });
-                }}
-                onTransformEnd={(ev) => {
-                  commitTransform(ev.target as Konva.Rect, "anchor", { anchorId: anchor.id });
-                }}
-              />
-            );
-          })}
-        {state.showOverlays &&
-          activeAnchorId &&
-          placementsToShow.map(({ component, placement }) => {
-            const selected =
-              selectedPlacement?.componentId === component.id &&
-              selectedPlacement.anchorId === placement.anchorId;
-            return (
-              <Rect
-                key={`${component.id}-${placement.anchorId}`}
-                ref={selected ? selectedNodeRef : undefined}
-                x={imageX + placement.rect.x * displayScale}
-                y={imageY + placement.rect.y * displayScale}
-                width={placement.rect.width * displayScale}
-                height={placement.rect.height * displayScale}
-                stroke={selected ? "#FFFFFF" : "#949BA6"}
-                strokeWidth={selected ? 2 : 1}
-                dash={selected ? undefined : [6, 4]}
-                fill="rgba(255,255,255,0.04)"
-                draggable={state.tool === "select" && selected}
-                onClick={(ev) => {
-                  ev.cancelBubble = true;
-                  dispatch({
-                    type: "SET_SELECTION",
-                    selection: {
-                      kind: "placement",
-                      screenId: screen.id,
-                      anchorId: placement.anchorId,
-                      componentId: component.id,
-                    },
-                  });
-                }}
-                onDragEnd={(ev) => {
-                  const node = ev.target;
-                  const x = (node.x() - imageX) / displayScale;
-                  const y = (node.y() - imageY) / displayScale;
-                  dispatch({
-                    type: "UPDATE_PLACEMENT_RECT",
-                    screenId: screen.id,
-                    componentId: component.id,
-                    anchorId: placement.anchorId,
-                    rect: clampRect(
-                      {
-                        x,
-                        y,
-                        width: placement.rect.width,
-                        height: placement.rect.height,
-                      },
-                      screen.image,
-                    ),
-                  });
-                }}
-                onTransformEnd={(ev) => {
-                  commitTransform(ev.target as Konva.Rect, "placement", {
-                    anchorId: placement.anchorId,
-                    componentId: component.id,
-                  });
-                }}
-              />
-            );
-          })}
+        {overlayBoxes.map((box) => (
+          <Rect
+            key={box.key}
+            ref={box.selected ? selectedNodeRef : undefined}
+            x={box.x}
+            y={box.y}
+            width={box.width}
+            height={box.height}
+            stroke={box.stroke.color}
+            strokeWidth={box.stroke.width}
+            dash={box.stroke.dash ?? []}
+            fill="transparent"
+            cornerRadius={overlayCornerRadius}
+            strokeScaleEnabled={false}
+            listening={overlayInteract}
+            draggable={state.tool === "select" && box.selected && !canvasLocked}
+            onClick={(ev) => {
+              ev.cancelBubble = true;
+              box.onSelect();
+            }}
+            onDragMove={(ev) => syncLiveBox(ev.target as Konva.Rect)}
+            onTransform={(ev) => syncLiveBox(ev.target as Konva.Rect)}
+            onDragEnd={(ev) => box.onCommit(ev.target as Konva.Rect)}
+            onTransformEnd={(ev) => box.onCommit(ev.target as Konva.Rect)}
+          />
+        ))}
+        {overlayBoxes.map((box) => (
+          <OverlayLabel
+            key={`label-${box.key}`}
+            x={box.selected && liveBox ? liveBox.x : box.x}
+            y={box.selected && liveBox ? liveBox.y : box.y}
+            name={box.name}
+            listening={overlayInteract}
+            onClick={box.onSelect}
+          />
+        ))}
         {draftRect && (
           <Rect
             x={imageX + draftRect.x * displayScale}
             y={imageY + draftRect.y * displayScale}
             width={draftRect.width * displayScale}
             height={draftRect.height * displayScale}
-            stroke="#FFFFFF"
+            stroke={overlaySelected.color}
+            strokeWidth={overlaySelected.width}
             dash={[4, 4]}
             listening={false}
           />
@@ -404,22 +425,13 @@ export function EditorCanvas({
         <Transformer
           ref={transformerRef}
           rotateEnabled={false}
+          keepRatio={false}
           ignoreStroke
-          borderStroke="#FFFFFF"
-          borderStrokeWidth={2}
-          anchorStroke="#FFFFFF"
-          anchorFill="#101216"
-          anchorSize={8}
-          enabledAnchors={[
-            "top-left",
-            "top-right",
-            "bottom-left",
-            "bottom-right",
-            "middle-left",
-            "middle-right",
-            "top-center",
-            "bottom-center",
-          ]}
+          borderEnabled={false}
+          anchorFill={overlayHandle.fill}
+          anchorSize={overlayHandle.size}
+          enabledAnchors={["top-left", "top-right", "bottom-left", "bottom-right"]}
+          listening={state.tool === "select" && !canvasLocked}
         />
       </Layer>
     </Stage>
