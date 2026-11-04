@@ -6,11 +6,17 @@
 
 Desktop editor that maps UI components onto screenshots and exports relative coordinates plus PNG templates. It does not capture windows, run automations, or detect objects.
 
-Logical components (`coord` or `bbox`) are shared across anchors on a screen, with one placement per `(component, anchor)`. Offsets are derived from rectangles, not stored. Stack: Tauri 2, React 19, TypeScript, Vite, Tailwind 4, Konva. UI copy is English.
+Anchors are reference regions on the screenshot; logical components (`coord` or `bbox`) get one rectangle per anchor, with offsets derived at export—not stored in the project. Tauri 2, React, TypeScript, Vite, and Konva. UI copy is English.
+
+## Preview
+
+<p align="center">
+  <img src="assets/rectra-editor.png" alt="Rectra workspace with explorer, screenshot canvas, and inspector" width="720" />
+</p>
 
 ## Setup
 
-You need **Node.js** with **npm**, and a **Rust** toolchain that supports [edition 2024](https://doc.rust-lang.org/edition-guide/rust-2024/index.html) (Rust 1.85 or newer). Also install the [Tauri 2 platform prerequisites](https://v2.tauri.app/start/prerequisites/) for your OS.
+**Node.js** with **npm**, plus **Rust** [edition 2024](https://doc.rust-lang.org/edition-guide/rust-2024/index.html) (1.85+) and the [Tauri 2 prerequisites](https://v2.tauri.app/start/prerequisites/) for your OS.
 
 ```bash
 npm install
@@ -24,17 +30,15 @@ npm run tauri dev
 
 1. **New** — create a project in memory.
 2. Add a screen and import a PNG or JPEG.
-3. Draw at least one **Anchor** (`A`), then map **Components** (`C`) on the active anchor. Map the same logical component onto other anchors when the layout needs different placements.
-4. **Save** — first save picks a parent folder and writes `<name>.rectra/` (`project.json` + `assets/`). Later saves write back to that folder. There is no Save As.
-5. **Export** — writes `mappings.json` and one PNG crop per anchor into a managed folder. Export is disabled until the project has an anchor. Open does not load an export package as a project.
-
-Release build:
+3. Draw at least one **Anchor** (`A`), then map **Components** (`C`) on the active anchor. Reuse the same component on other anchors when placements differ.
+4. **Save** — first save chooses a folder and writes `<name>.rectra/` (`project.json` + `assets/`). Later saves update that folder. No Save As.
+5. **Export** — writes `mappings.json` and one PNG per anchor into a managed folder. Disabled until the project has an anchor. Export packages are not opened as projects.
 
 ```bash
 npm run tauri build
 ```
 
-Canvas shortcuts (`V` / `A` / `C`, Fit, pan) do not fire while an input, textarea, select, or dialog is focused. File chords (`Ctrl/Cmd+N`, `O`, `S`, `E`) still work with a focused field. Component is disabled until an anchor is selected.
+Canvas shortcuts do not run while an input, textarea, select, or dialog is focused; file shortcuts (`Ctrl/Cmd+N`, `O`, `S`, `E`) still do. Component mapping requires a selected anchor.
 
 ## Development
 
@@ -42,19 +46,18 @@ Canvas shortcuts (`V` / `A` / `C`, Fit, pan) do not fire while an input, textare
 npm test              # Vitest (`tests/**/*.spec.ts`)
 npm run test:watch
 npm run build         # `tsc` and Vite → `dist/`
-npm run dev           # Vite UI only (port 1420); file dialogs need the Tauri app
+npm run dev           # Vite on port 1420; dialogs need `npm run tauri dev`
 ```
 
-There is no ESLint or CI workflow in this repo.
+No ESLint or CI in this repo.
 
 ## Docs
 
-- Module layout and boundaries: [`ARCHITECTURE.md`](ARCHITECTURE.md)
-- Product behavior and UI copy: Penpot file `Rectra · UI`
+[`ARCHITECTURE.md`](ARCHITECTURE.md) — modules and boundaries. Penpot `Rectra · UI` — behavior and interface copy.
 
 ## Limitations
 
-- One screenshot per screen; PNG/JPEG only. Replace is allowed only when dimensions match.
+- One screenshot per screen (PNG/JPEG); replace only when dimensions match.
 - No snap, grid, multi-select, Save As, plugins, network, or telemetry.
 - Undo does not restore deleted files on disk.
-- Export refuses folders it does not manage (`mappings.json` + `templates/`).
+- Export only into folders the app manages (`mappings.json` + `templates/`).
