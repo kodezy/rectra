@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import type { Project, Screen, ScreenImageMem } from "../src/model/types";
+import type { Project, Screen, ScreenImageMem } from "../ui/model/types";
 import {
   applySavedScreenAssets,
   isExportMappingsDocument,
   isProjectDocument,
   shouldWriteScreenAsset,
-} from "../src/persistence/saveLogic";
+} from "../ui/persistence/saveLogic";
 
 const screen: Screen = {
   id: "s1",

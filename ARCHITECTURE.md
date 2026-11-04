@@ -1,6 +1,6 @@
 # Architecture
 
-Rectra is a desktop editor (Tauri 2 + React/TypeScript/Vite) that maps UI components onto screenshots. Domain logic lives in TypeScript. The Rust crate is the Tauri shell: window, dialog, and filesystem plugins. No HTTP, database, or custom IPC commands.
+Rectra is a desktop editor (Tauri 2 + React/TypeScript/Vite) that maps UI components onto screenshots. Domain logic lives in TypeScript under `ui/`. The Rust crate in `src-tauri/` is the Tauri shell: window, dialog, and filesystem plugins. No HTTP, database, or custom IPC commands.
 
 ## Vocabulary
 
@@ -18,10 +18,10 @@ Rectra is a desktop editor (Tauri 2 + React/TypeScript/Vite) that maps UI compon
 ## Layout
 
 ```
-src/model/           types, geometry, names, validate, export mappings
-src/editor/          session reducer, undo snapshots, Konva canvas
-src/app/             workspace shell (Explorer, Inspector, toolbar, dialogs)
-src/persistence/     open/save `.rectra`, export package, path helpers
+ui/model/            types, geometry, names, validate, export mappings
+ui/editor/           session reducer, undo snapshots, Konva canvas
+ui/app/              workspace shell (Explorer, Inspector, toolbar, dialogs)
+ui/persistence/      open/save `.rectra`, export package, path helpers
 src-tauri/           Tauri 2 window + dialog/fs/opener plugins
 tests/               Vitest: model, reducer, saveLogic, layout
 docs/product/        product spec (behavior)

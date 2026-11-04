@@ -16,7 +16,7 @@ npm run tauri dev
 ## Core invariants
 
 - **Model B:** logical components; one placement per `(componentId, anchorId)`; offsets derived from rects, not stored.
-- Domain stays in `src/model`. Do not add HTTP, Python, OpenCV, a database, Zustand, Zod, custom Rust commands, plugins, or telemetry.
+- Domain stays in `ui/model`. Do not add HTTP, Python, OpenCV, a database, Zustand, Zod, custom Rust commands, plugins, or telemetry.
 - One screenshot per screen (PNG/JPEG). No snap, grid, or Save As.
 - UI copy English. Product spec is behavior; Penpot is pixels/layout.
 - `model` must not import `app`, `editor`, or `persistence`.
@@ -25,11 +25,11 @@ npm run tauri dev
 
 - Architecture and module boundaries → [ARCHITECTURE.md](ARCHITECTURE.md)
 - Product behavior, file format, shortcuts → `docs/product/rectra_product_spec_v0_4.md`
-- Types and geometry → `src/model/`
-- Session edits / undo → `src/editor/reducer.ts`
-- Canvas → `src/editor/canvas/EditorCanvas.tsx`
-- Shell (explorer, inspector, dialogs) → `src/app/`
-- `.rectra` save/open and export → `src/persistence/`
+- Types and geometry → `ui/model/`
+- Session edits / undo → `ui/editor/reducer.ts`
+- Canvas → `ui/editor/canvas/EditorCanvas.tsx`
+- Shell (explorer, inspector, dialogs) → `ui/app/`
+- `.rectra` save/open and export → `ui/persistence/`
 - Tauri window and plugins → `src-tauri/` (capabilities in `src-tauri/capabilities/default.json`)
 - Tests → `tests/*.spec.ts`
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { editorReducer, initialEditorState } from "../src/editor/reducer";
-import { specExampleProject } from "../src/model/fixture";
+import { editorReducer, initialEditorState } from "../ui/editor/reducer";
+import { specExampleProject } from "../ui/model/fixture";
 
 describe("editorReducer", () => {
   it("AC-11 remove mapping on one anchor keeps other", () => {

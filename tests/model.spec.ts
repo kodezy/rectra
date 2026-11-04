@@ -5,7 +5,7 @@ import {
   rectFromDragEndpoints,
   specExampleProject,
   validateProject,
-} from "../src/model";
+} from "../ui/model";
 
 describe("spec example offsets AC-03–AC-05", () => {
   const project = specExampleProject();

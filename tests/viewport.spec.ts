@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { imagePointFromStage } from "../src/model/geometry";
+import { imagePointFromStage } from "../ui/model/geometry";
 import {
   clampUserScale,
   fitImageInHost,
   stepUserScale,
   zoomToward,
-} from "../src/editor/viewport";
+} from "../ui/editor/viewport";
 
 describe("fitImageInHost", () => {
   it("letterboxes and caps fit scale at 2", () => {

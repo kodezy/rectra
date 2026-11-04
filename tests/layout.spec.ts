@@ -9,7 +9,7 @@ import {
   explorerDefaultWidth,
   inspectorDefaultWidth,
   isCompactWidth,
-} from "../src/app/layout";
+} from "../ui/app/layout";
 
 describe("Penpot layout tokens AC-42", () => {
   it("uses header 56 and footer 28", () => {
