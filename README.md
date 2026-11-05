@@ -4,7 +4,7 @@
 
 # Rectra
 
-Desktop editor that maps UI components onto screenshots and exports relative coordinates plus PNG templates.
+Desktop editor for mapping logical UI components onto screenshot regions defined by anchors.
 
 Tauri 2, React, TypeScript, Vite, and Konva.
 
