@@ -62,7 +62,7 @@ Dependency direction: `core/model` imports nothing from `ui`, `core/editor`, or 
 
 ## Commands
 
-From `package.json` / `native/tauri.conf.json` (`TAURI_APP_PATH=native` for npm scripts):
+From `package.json` / `native/tauri.conf.json`. `npm run tauri` runs the CLI at the repo root; it loads `native/` (the only `tauri.conf.json`) under Windows cmd and Unix shells.
 
 ```
 npm install
