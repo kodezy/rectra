@@ -1,10 +1,12 @@
 <p align="center">
-  <img src="assets/rectra-identity-dark.png" alt="Rectra" width="320" />
+  <img src="public/rectra.svg" alt="" width="112" />
 </p>
 
-# Rectra
+<h1 align="center">Rectra</h1>
 
-Desktop editor for mapping logical UI components onto screenshot regions defined by anchors.
+<p align="center">
+  Desktop editor for mapping logical UI components onto screenshot regions defined by anchors.
+</p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Tauri-24C8DB?logo=tauri&logoColor=white" alt="Tauri">
@@ -35,7 +37,7 @@ npm install
 npm run tauri dev
 ```
 
-Create a project, import PNG or JPEG screens, draw anchors, map components, then **Save** (`.rectra`) or **Export** (`mappings.json` and templates). **Map component** reuses an existing component and keeps its offset. There is no Save As; an export folder is not a project.
+Create a project, import PNG or JPEG screens, draw anchors, map components, then **Save** (`.rectra`) or **Export** (`mappings.json` and `templates/`). **Map component** reuses an existing component and keeps its offset. There is no Save As; an export folder is not a project.
 
 The full mapping path, shortcuts, and limits: [Product](docs/PRODUCT.md).
 
