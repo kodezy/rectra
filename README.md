@@ -6,7 +6,14 @@
 
 Desktop editor for mapping logical UI components onto screenshot regions defined by anchors.
 
-Tauri 2, React, TypeScript, Vite, and Konva.
+<p align="center">
+  <img src="https://img.shields.io/badge/Tauri-24C8DB?logo=tauri&logoColor=white" alt="Tauri">
+  <img src="https://img.shields.io/badge/React-20232a?logo=react&logoColor=61DAFB" alt="React">
+  <img src="https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white" alt="TypeScript">
+  <img src="https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=white" alt="Vite">
+  <img src="https://img.shields.io/badge/Tailwind%20CSS-0F172A?logo=tailwindcss&logoColor=38BDF8" alt="Tailwind CSS">
+  <img src="https://img.shields.io/badge/Konva-0D83CD" alt="Konva">
+</p>
 
 ## Preview
 
@@ -16,7 +23,7 @@ Tauri 2, React, TypeScript, Vite, and Konva.
 
 ## Setup
 
-Install **Node.js** with **npm**, plus **Rust** [edition 2024](https://doc.rust-lang.org/edition-guide/rust-2024/index.html) (1.85+) and the [Tauri 2 prerequisites](https://v2.tauri.app/start/prerequisites/) for your OS.
+Install **Node.js 22** with **npm**, plus **Rust** [edition 2024](https://doc.rust-lang.org/edition-guide/rust-2024/index.html) (1.85+) and the [Tauri 2 prerequisites](https://v2.tauri.app/start/prerequisites/) for your OS.
 
 ```bash
 npm install
@@ -28,41 +35,35 @@ npm install
 npm run tauri dev
 ```
 
-1. **New** creates a project in memory.
-2. Add a screen and import a PNG or JPEG.
-3. Draw at least one **Anchor** (`A`).
-4. Map **Components** (`C`) on the active anchor.
-5. To reuse a component on another anchor, use **Map component**. The new placement keeps the existing offset.
-6. **Save** asks for a parent folder the first time and writes `<name>.rectra/` (`project.json` and `assets/`). Later saves update that folder.
-7. **Export** writes `mappings.json` and one PNG per anchor into an empty folder or an export folder the app already manages. It stays disabled until the project has an anchor.
+Create a project, import PNG or JPEG screens, draw anchors, map components, then **Save** (`.rectra`) or **Export** (`mappings.json` and templates). **Map component** reuses an existing component and keeps its offset. There is no Save As; an export folder is not a project.
 
-There is no Save As. Export packages cannot be opened as projects.
+The full mapping path, shortcuts, and limits: [Product](docs/PRODUCT.md).
 
-File shortcuts (`Ctrl/Cmd+N`, `O`, `S`, `E`) still run while an input, textarea, or select is focused. They do not run while a dialog is open. Canvas shortcuts do not run in either case. The component tool requires an active anchor.
+## Architecture
+
+```text
+core/     mapping logic (no React)
+ui/       workspace and Konva canvas
+native/   Tauri window, dialogs, filesystem
+```
+
+Boundaries: [Architecture](docs/ARCHITECTURE.md).
 
 ## Development
 
 ```bash
 npm test
-npm run test:watch
 npm run build
-npm run tauri build
 ```
 
-`npm test` runs Vitest (`tests/**/*.spec.ts`). `npm run build` runs `tsc` and Vite into `dist/`.
+`npm test` runs Vitest. `npm run build` runs `tsc` and Vite into `dist/`. Native file dialogs need `npm run tauri dev`, not `npm run dev` alone.
 
-`npm run dev` starts Vite on port 1420. Native file dialogs need `npm run tauri dev`.
-
-CI (`.github/workflows/ci.yml`) runs `npm test` and `npm run build` on push to `main` and on pull requests. No ESLint.
+CI, the rest of the commands, and how a change reaches `main`: [Development](docs/DEVELOPMENT.md).
 
 ## Docs
 
-- [ARCHITECTURE.md](ARCHITECTURE.md) — modules, vocabulary, and boundaries
-
-## Limitations
-
-- One screenshot per screen (PNG/JPEG). Replace only when the new image has the same dimensions.
-- No snap, grid, multi-select, Save As, plugins, network, or telemetry.
-- Undo does not restore deleted files on disk.
-- Export only into empty folders or folders the app manages (`mappings.json` and `templates/`).
-- UI copy is English.
+- [Product](docs/PRODUCT.md) — what the editor promises, the flows, and the vocabulary
+- [Design](docs/DESIGN.md) — workspace principles and Penpot `Rectra · UI`
+- [Architecture](docs/ARCHITECTURE.md) — modules, boundaries, and invariants
+- [Development](docs/DEVELOPMENT.md) — commands, tests, and delivery
+- [AGENTS.md](AGENTS.md) — map for coding agents

@@ -24,7 +24,6 @@ lerna-debug.log*
 # Environment
 .env
 .env.*
-!.env.example
 
 # Rust / Tauri
 native/target/
@@ -39,3 +38,14 @@ Thumbs.db
 *.swp
 *.swo
 *~
+
+# Agent plans/specs (local only; not part of the repo)
+docs/superpowers/
+.superpowers/
+.worktrees/
+
+# Agent harness (skills installed by brantz; not versioned)
+.claude/
+.cursor/
+.agents/
+.brantz-lock.json
