@@ -1,8 +1,6 @@
 <p align="center">
-  <img src="public/rectra.svg" alt="" width="112" />
+  <img src="assets/banner.png" alt="Rectra" width="520" />
 </p>
-
-<h1 align="center">Rectra</h1>
 
 <p align="center">
   Desktop editor for mapping logical UI components onto screenshot regions defined by anchors.
